@@ -1,25 +1,26 @@
 package com.blackbeard.sensors;
 
+import android.Manifest;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
+import android.app.LoaderManager.LoaderCallbacks;
+import android.content.CursorLoader;
 import android.content.Intent;
+import android.content.Loader;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
-import android.support.v7.app.AppCompatActivity;
-import android.app.LoaderManager.LoaderCallbacks;
-
-import android.content.CursorLoader;
-import android.content.Loader;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -30,10 +31,15 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.TextView;
+import com.bizapps.sensors.R;
 import com.blackbeard.sensors.dto.RegisterDto;
 import com.blackbeard.sensors.dto.TokenDto;
 import com.blackbeard.sensors.utils.AppUtil;
+import com.blackbeard.sensors.utils.Constants;
+import com.blackbeard.sensors.utils.PreferencesUtil;
+import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,9 +49,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import com.blackbeard.sensors.utils.Constants;
-
-import static android.Manifest.permission.READ_CONTACTS;
 
 /**
  * A login screen that offers login via email/password.
@@ -57,6 +60,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
    */
   private static final int REQUEST_READ_CONTACTS = 0;
   private static final String TAG = LoginActivity.class.getSimpleName();
+  private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 123;
 
   private UserLoginTask mAuthTask = null;
 
@@ -99,10 +103,54 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     super.onStart();
     SharedPreferences pref = LoginActivity.this.getSharedPreferences(Constants.PREFS, MODE_PRIVATE);
     String token = pref.getString(Constants.PREF_TOKEN, null);
+    //TODO
     if (!TextUtils.isEmpty(token)) {
       finish();
-      Intent intent = new Intent(Constants.ACTION_START_SENSOR_ACTIVITY);
+      Intent intent = new Intent(this, MainActivity.class);
       LoginActivity.this.startActivity(intent);
+    }
+
+    checkPermissionShit();
+  }
+
+  private void checkPermissionShit() {
+    // Here, thisActivity is the current activity
+
+    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
+        && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+        && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED
+        && ContextCompat.checkSelfPermission(this, Manifest.permission.BATTERY_STATS) != PackageManager.PERMISSION_GRANTED
+        && ContextCompat.checkSelfPermission(this, Manifest.permission.NFC) != PackageManager.PERMISSION_GRANTED
+        ) {
+
+      // Should we show an explanation?
+      if (ActivityCompat.shouldShowRequestPermissionRationale(this,
+          Manifest.permission.READ_PHONE_STATE)) {
+
+        // Show an expanation to the user *asynchronously* -- don't block
+        // this thread waiting for the user's response! After the user
+        // sees the explanation, try again to request the permission.
+
+      } else {
+
+        // No explanation needed, we can request the permission.
+
+        ActivityCompat.requestPermissions(this,
+            new String[] { Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.BATTERY_STATS,
+                Manifest.permission.NFC,
+
+            },
+            MY_PERMISSIONS_REQUEST_READ_CONTACTS);
+
+        // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
+        // app-defined int constant. The callback method gets the
+        // result of the request.
+      }
     }
   }
 
@@ -118,18 +166,18 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
       return true;
     }
-    if (checkSelfPermission(READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+    if (checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
       return true;
     }
-    if (shouldShowRequestPermissionRationale(READ_CONTACTS)) {
+    if (shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS)) {
       Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
           .setAction(android.R.string.ok, new View.OnClickListener() {
             @Override @TargetApi(Build.VERSION_CODES.M) public void onClick(View v) {
-              requestPermissions(new String[] { READ_CONTACTS }, REQUEST_READ_CONTACTS);
+              requestPermissions(new String[] { Manifest.permission.READ_CONTACTS }, REQUEST_READ_CONTACTS);
             }
           });
     } else {
-      requestPermissions(new String[] { READ_CONTACTS }, REQUEST_READ_CONTACTS);
+      requestPermissions(new String[] { Manifest.permission.READ_CONTACTS }, REQUEST_READ_CONTACTS);
     }
     return false;
   }
@@ -139,10 +187,30 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
    */
   @Override public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
       @NonNull int[] grantResults) {
-    if (requestCode == REQUEST_READ_CONTACTS) {
-      if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-        populateAutoComplete();
+    switch (requestCode) {
+      case REQUEST_READ_CONTACTS: {
+        if (grantResults.length == 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+          populateAutoComplete();
+        }
+        break;
       }
+      case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+        // If request is cancelled, the result arrays are empty.
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+
+          // permission was granted, yay! Do the
+          // contacts-related task you need to do.
+
+        } else {
+
+          // permission denied, boo! Disable the
+          // functionality that depends on this permission.
+        }
+        break;
+      }
+
+      // other 'case' lines to check for other
+      // permissions this app might request
     }
   }
 
@@ -155,6 +223,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     if (mAuthTask != null) {
       return;
     }
+    //TODO:
+    Intent intent = new Intent(this, MainActivity.class);
+    LoginActivity.this.startActivity(intent);
 
     // Reset errors.
     mEmailView.setError(null);
@@ -169,7 +240,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     // Check for a valid name, if the user entered one.
     if (!TextUtils.isEmpty(name) && !isNameValid(name)) {
-      mNameView.setError(getString(R.string.error_invalid_password));
+      mNameView.setError(getString(R.string.error_invalid_name));
       focusView = mNameView;
       cancel = true;
     }
@@ -302,12 +373,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private final String email;
     private final String name;
     private final OkHttpClient client = new OkHttpClient();
-    private final Gson gson = new Gson();
-
+    private final Gson gson;
     UserLoginTask(String email, String name) {
       this.email = email;
       this.name = name;
-    }
+      this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+          .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+          .create();
+
+  }
 
     @Override protected TokenDto doInBackground(Void... params) {
       // TODO: attempt authentication against a network service.
@@ -364,12 +438,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
       if (success != null) {
         finish();
-        SharedPreferences pref = LoginActivity.this.getSharedPreferences(Constants.PREFS, MODE_PRIVATE);
-        pref.edit().putString(Constants.PREF_TOKEN, success.getToken()).apply();
-        Intent intent = new Intent(Constants.ACTION_START_SENSOR_ACTIVITY);
+        PreferencesUtil.saveToken(LoginActivity.this, success.getToken());
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         LoginActivity.this.startActivity(intent);
       } else {
-        mNameView.setError(getString(R.string.error_incorrect_password));
+        mNameView.setError(getString(R.string.error_incorrect_name));
         mNameView.requestFocus();
       }
     }

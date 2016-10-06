@@ -6,8 +6,15 @@ import lombok.Data;
 /**
  * Created by sudendra.kamble on 29/09/16.
  */
-@Data
 @AllArgsConstructor(suppressConstructorProperties = true)
-public class TokenDto {
+public class TokenDto extends APIResponseDto{
   String token;
+
+  public String getToken() {
+    return token;
+  }
+
+  public void setToken(String token) {
+    this.token = token;
+  }
 }

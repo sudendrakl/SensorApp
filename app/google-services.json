@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "215834152738",
+    "firebase_url": "https://blackbeard-47126.firebaseio.com",
+    "project_id": "blackbeard-47126",
+    "storage_bucket": "blackbeard-47126.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:215834152738:android:359346ec90cc6d4d",
+        "android_client_info": {
+          "package_name": "com.bizapps.sensors"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "215834152738-lgu4ghpbkpfd0mhj1v9d76tu6e3jhlrk.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bizapps.sensors",
+            "certificate_hash": "81BD34743781D57A37A8333066437ED38D165FAD"
+          }
+        },
+        {
+          "client_id": "215834152738-d12jqs4biiqferbk0ik94v8biev03pbd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBG0OFpns1kKOHq6ctPF5ZrrmsHOz9kQ7k"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "215834152738-d12jqs4biiqferbk0ik94v8biev03pbd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

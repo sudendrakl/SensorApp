@@ -9,7 +9,7 @@ import lombok.Data;
 @Data
 @AllArgsConstructor(suppressConstructorProperties = true)
 public class RegisterDto {
-  String name;
-  String imei;
-  String email;
+  String userName;
+  String uid;
+  String mailId;
 }
