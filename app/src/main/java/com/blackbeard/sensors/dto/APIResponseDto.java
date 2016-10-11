@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 public class APIResponseDto {
-  String status;
+  boolean status;
   String message;
   int code;
 }

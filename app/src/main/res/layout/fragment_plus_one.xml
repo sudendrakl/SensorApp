@@ -9,9 +9,9 @@
       android:id="@+id/cardview"
       android:layout_width="fill_parent"
       android:layout_height="wrap_content"
-      android:elevation="100dp"
+      android:elevation="50dp"
       card_view:cardBackgroundColor="@color/cardview_initial_background"
-      card_view:cardCornerRadius="4dp"
+      card_view:cardCornerRadius="2dp"
       android:layout_margin="@dimen/margin_small"
       >
     <LinearLayout
@@ -26,6 +26,7 @@
           android:layout_height="wrap_content"
           android:layout_margin="@dimen/margin_tiny"
           android:text="string/cardview_contents"
+          android:textStyle="bold"
           />
 
       <TextView

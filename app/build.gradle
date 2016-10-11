@@ -35,7 +35,7 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
       signingConfig signingConfigs.release
       versionNameSuffix "-release"
-      buildConfigField "String", "BASE_URL", '"ADD YOUR URL HERE"' //TODO
+      buildConfigField "String", "BASE_URL", '"http://139.59.5.88:3500/"' //TODO for release
 
     }
     debug {
@@ -43,7 +43,7 @@ android {
       minifyEnabled false
       signingConfig signingConfigs.debug
       versionNameSuffix "-debug"
-      buildConfigField "String", "BASE_URL", '"http://139.59.5.88:3500"' //TODO for debug
+      buildConfigField "String", "BASE_URL", '"http://139.59.5.88:3500/"' //TODO for debug
 
     }
   }
@@ -69,6 +69,7 @@ dependencies {
   provided 'org.projectlombok:lombok:1.14.4'
   annotationProcessor 'org.projectlombok:lombok:1.14.4'
   compile 'com.android.support:cardview-v7:24.2.1'
+
 }
 //
 apt {

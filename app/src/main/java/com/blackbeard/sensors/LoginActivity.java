@@ -8,7 +8,6 @@ import android.app.LoaderManager.LoaderCallbacks;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -37,14 +36,10 @@ import com.blackbeard.sensors.dto.TokenDto;
 import com.blackbeard.sensors.utils.AppUtil;
 import com.blackbeard.sensors.utils.Constants;
 import com.blackbeard.sensors.utils.PreferencesUtil;
-import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import okhttp3.Headers;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -101,8 +96,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
   @Override protected void onStart() {
     super.onStart();
-    SharedPreferences pref = LoginActivity.this.getSharedPreferences(Constants.PREFS, MODE_PRIVATE);
-    String token = pref.getString(Constants.PREF_TOKEN, null);
+    String token = PreferencesUtil.getToken(this);
     //TODO
     if (!TextUtils.isEmpty(token)) {
       finish();
@@ -125,13 +119,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         ) {
 
       // Should we show an explanation?
-      if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-          Manifest.permission.READ_PHONE_STATE)) {
+      if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_PHONE_STATE)
+          ||ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)
+          ||ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)
+          ||ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.BLUETOOTH)
+          ||ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.BATTERY_STATS)
+          ||ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.NFC)
+          ) {
 
         // Show an expanation to the user *asynchronously* -- don't block
         // this thread waiting for the user's response! After the user
         // sees the explanation, try again to request the permission.
-
+        Snackbar.make(mLoginFormView, "Grant permission in settings", Snackbar.LENGTH_INDEFINITE).setAction(
+            "OK", new View.OnClickListener() {
+              @Override public void onClick(View v) {
+                Log.i(TAG, "Grant permission in settings");
+              }
+            });
       } else {
 
         // No explanation needed, we can request the permission.
@@ -220,12 +224,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
    * errors are presented and no actual login attempt is made.
    */
   private void attemptLogin() {
+    checkPermissionShit();
     if (mAuthTask != null) {
       return;
     }
-    //TODO:
-    Intent intent = new Intent(this, MainActivity.class);
-    LoginActivity.this.startActivity(intent);
 
     // Reset errors.
     mEmailView.setError(null);
@@ -368,22 +370,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
    * Represents an asynchronous login/registration task used to authenticate
    * the user.
    */
-  public class UserLoginTask extends AsyncTask<Void, Void, TokenDto> {
+  public class UserLoginTask extends AsyncTask<Void, Void, Response> {
 
     private final String email;
     private final String name;
     private final OkHttpClient client = new OkHttpClient();
+
     private final Gson gson;
     UserLoginTask(String email, String name) {
       this.email = email;
       this.name = name;
-      this.gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-          .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-          .create();
+      this.gson = Constants.GSON;
 
   }
 
-    @Override protected TokenDto doInBackground(Void... params) {
+    @Override protected Response doInBackground(Void... params) {
       // TODO: attempt authentication against a network service.
 
       try {
@@ -391,13 +392,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         String jsonParams = gson.toJson(
             new RegisterDto(name, email, AppUtil.getImeiOrUniqueID(LoginActivity.this)));
 
-        HashMap<String, String> headerMap = new HashMap<>();
-        headerMap.put("Content-Type", "application/json");
-        Headers headers = Headers.of(headerMap);
-
-        TokenDto tokenDto =
-            sendRequest(Constants.URLS.REGISTER, headers, jsonParams, TokenDto.class);
-        return tokenDto;
+        return sendRequest(Constants.URLS.REGISTER, jsonParams);
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -406,50 +401,69 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
       return null;
     }
 
-    private <T> T sendRequest(String url, Headers headers, String postParams, Class<T> clazz)
+    private Response sendRequest(String url, String postParams)
         throws IOException {
-      Request request;
-      if (headers != null) {
-        request = new Request.Builder().url(url)
-            .headers(headers)
-            .post(RequestBody.create(Constants.MEDIA_TYPE_MARKDOWN, postParams))
-            .build();
-      } else {
-        request = new Request.Builder().url(url)
-            .post(RequestBody.create(Constants.MEDIA_TYPE_MARKDOWN, postParams))
-            .build();
-      }
+      RequestBody body = RequestBody.create(Constants.JSON_TYPE_MARKDOWN, postParams);
+      Request request = new Request.Builder()
+          .url(url)
+          .post(body)
+          .build();
 
       Response response = client.newCall(request).execute();
-      if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
 
-      Log.i(TAG, response.body().string());
-
-      T responseParse = gson.fromJson(response.body().charStream(), clazz);
-      //TODO: updated response
-      Log.i(TAG, response.toString());
-
-      return responseParse;
+      return response;
     }
 
-    @Override protected void onPostExecute(final TokenDto success) {
+    @Override protected void onPostExecute(final Response response) {
       mAuthTask = null;
       showProgress(false);
-
-      if (success != null) {
-        finish();
-        PreferencesUtil.saveToken(LoginActivity.this, success.getToken());
-        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
-        LoginActivity.this.startActivity(intent);
-      } else {
-        mNameView.setError(getString(R.string.error_incorrect_name));
-        mNameView.requestFocus();
+      try {
+        if (!response.isSuccessful()) {
+          handleFailure(response);
+        } else {
+          handleSuccess(response);
+        }
+      } catch (IOException ex) {
+        Log.e(TAG, "Some shit happened", ex);
       }
     }
 
     @Override protected void onCancelled() {
       mAuthTask = null;
       showProgress(false);
+    }
+
+    void handleFailure(Response response) throws IOException {
+      TokenDto responseParse = gson.fromJson(new String(response.body().bytes()), TokenDto.class);
+      handleFailure(responseParse);
+    }
+
+    void handleFailure(TokenDto tokenDto) {
+      if (tokenDto.getCode() == 1) {
+        Snackbar.make(mLoginFormView, "Incorrect details", Snackbar.LENGTH_INDEFINITE)
+            .setAction("OK", null)
+            .show();
+      } else {
+        Snackbar.make(mLoginFormView, "Retry again", Snackbar.LENGTH_INDEFINITE)
+            .setAction("OK", null)
+            .show();
+      }
+
+      mNameView.requestFocus();
+    }
+
+    void handleSuccess(Response response) throws IOException {
+      TokenDto responseParse = gson.fromJson(new String(response.body().bytes()), TokenDto.class);
+      //TODO: updated response
+      Log.i(TAG, response.toString());
+
+      if(responseParse.isStatus()) {
+        PreferencesUtil.saveToken(LoginActivity.this, responseParse.getToken());
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        LoginActivity.this.startActivity(intent);
+      } else {
+        handleFailure(responseParse);
+      }
     }
   }
 }

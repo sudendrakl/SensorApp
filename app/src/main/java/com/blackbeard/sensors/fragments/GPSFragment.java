@@ -11,6 +11,8 @@ import android.view.View;
 import android.widget.TextView;
 import com.blackbeard.sensors.BackgroundLocationService;
 import com.bizapps.sensors.R;
+import com.blackbeard.sensors.dto.AccelerometerDto;
+import com.blackbeard.sensors.dto.GPSDto;
 import com.blackbeard.sensors.utils.Constants;
 import com.blackbeard.sensors.utils.LocationUtils;
 import com.google.android.gms.location.LocationResult;
@@ -21,6 +23,8 @@ import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class GPSFragment extends Fragment {
   public static final String TAG = GPSFragment.class.getSimpleName();
@@ -32,6 +36,12 @@ import org.androidannotations.annotations.ViewById;
   @ViewById TextView optionContent;
   Context context;
 
+  boolean isEnabled;
+  boolean isAvailable;
+  String provider;
+  String accuracyMode;
+  Location location;
+
   @AfterInject  void init() {
     context = getActivity();
 
@@ -41,12 +51,15 @@ import org.androidannotations.annotations.ViewById;
 
   @AfterViews  void initViews() {
     title.setText("GPS");
-    updateText("Available:" + LocationUtils.hasGPS(context) + " Provider:" + LocationUtils.getProvider(context)+ " Enabled:" + LocationUtils.isGPSEnabled(context)+ " Accuracy:" + LocationUtils.getLocationModeStr(context));
+    isAvailable = LocationUtils.hasGPS(context);
+    provider = LocationUtils.getProvider(context);
+    isEnabled = LocationUtils.isGPSEnabled(context);
+    accuracyMode = LocationUtils.getLocationModeStr(context);
+    updateText("Available:" + isAvailable + " Provider:" + provider + " Enabled:" + isEnabled + " Accuracy:" + accuracyMode);
   }
 
   @Receiver(actions = Constants.ACTION_BROADCAST_LOCATION, registerAt = Receiver.RegisterAt.OnResumeOnPause)
    void onLocationChanged(Intent intent) {
-    Location location;
     if (LocationResult.hasResult(intent)) {
       LocationResult locationResult = LocationResult.extractResult(intent);
       location = locationResult.getLastLocation();
@@ -82,5 +95,18 @@ import org.androidannotations.annotations.ViewById;
   @UiThread  void handlePostDetach() {
     Intent intent = new Intent(context, BackgroundLocationService.class);
     context.stopService(intent);
+  }
+
+
+  public JSONObject getData() throws JSONException {
+    GPSDto aDto = new GPSDto();
+    aDto.setEnabled(isEnabled);
+    aDto.setAccuracyMode(accuracyMode);
+    aDto.setAvailable(isAvailable);
+    aDto.setProvider(provider);
+    aDto.setLocation(location);
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("gps", Constants.GSON.toJson(aDto));
+    return jsonObject;
   }
 }

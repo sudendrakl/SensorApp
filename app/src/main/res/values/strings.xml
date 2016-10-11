@@ -15,4 +15,5 @@
   </string>
   <string name="prompt_your_name">Your Name</string>
   <string name="title_activity_main">MainActivity</string>
+  <string name="hint_search">Search</string>
 </resources>

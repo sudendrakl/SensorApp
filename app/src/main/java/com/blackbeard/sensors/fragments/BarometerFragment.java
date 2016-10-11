@@ -8,12 +8,17 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
+import com.blackbeard.sensors.dto.AccelerometerDto;
+import com.blackbeard.sensors.dto.BarometerDto;
+import com.blackbeard.sensors.utils.Constants;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class BarometerFragment extends Fragment implements
     SensorEventListener{
@@ -28,6 +33,9 @@ import org.androidannotations.annotations.ViewById;
   @SystemService
   SensorManager sensorManager;
   Sensor senPressure;
+  float pressure;
+  boolean isEnabled;
+
   @AfterViews  void init() {
     title.setText("Barometer");
     updateText("Available:" + (senPressure!=null ? "yes" : "no"));
@@ -56,11 +64,11 @@ import org.androidannotations.annotations.ViewById;
 
   @Override public void onSensorChanged(SensorEvent sensorEvent) {
     Sensor mySensor = sensorEvent.sensor;
-
+    isEnabled = true;
     if (mySensor.getType() == Sensor.TYPE_PRESSURE) {
-      float v1 = sensorEvent.values[0];
+      pressure = sensorEvent.values[0];
 
-      updateOptionText(String.format("Pressure:%s", v1));
+      updateOptionText(String.format("Pressure:%s", pressure));
     }
   }
 
@@ -70,4 +78,14 @@ import org.androidannotations.annotations.ViewById;
     sensorManager.unregisterListener(this);
   }
 
+
+  public JSONObject getData() throws JSONException {
+    BarometerDto bDto = new BarometerDto();
+    bDto.setAvailable(senPressure!=null);
+    bDto.setEnabled(isEnabled);
+    bDto.setPressure(pressure);
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("barometer", Constants.GSON.toJson(bDto));
+    return jsonObject;
+  }
 }

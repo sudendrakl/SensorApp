@@ -1,7 +1,9 @@
 package com.blackbeard.sensors;
 
 import android.Manifest;
+import android.app.SearchManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -10,18 +12,21 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import com.bizapps.sensors.R;
 import com.blackbeard.sensors.dto.APIResponseDto;
 import com.blackbeard.sensors.dto.DeviceInfoDto;
-import com.blackbeard.sensors.dto.RegisterDto;
-import com.blackbeard.sensors.dto.TokenDto;
 import com.blackbeard.sensors.fragments.AccelerometerFragment;
 import com.blackbeard.sensors.fragments.AccelerometerFragment_;
 import com.blackbeard.sensors.fragments.BarometerFragment;
@@ -42,32 +47,32 @@ import com.blackbeard.sensors.fragments.StepCounterFragment;
 import com.blackbeard.sensors.fragments.StepCounterFragment_;
 import com.blackbeard.sensors.fragments.ThermometerFragment;
 import com.blackbeard.sensors.fragments.ThermometerFragment_;
-import com.blackbeard.sensors.utils.AppUtil;
 import com.blackbeard.sensors.utils.Constants;
 import com.blackbeard.sensors.utils.PreferencesUtil;
-import com.google.gson.FieldNamingPolicy;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.io.IOException;
-import java.util.HashMap;
-import okhttp3.Headers;
+import java.util.ArrayList;
+import java.util.List;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.json.JSONException;
 
 public class MainActivity extends AppCompatActivity {
 
   private static final String TAG = MainActivity.class.getSimpleName();
   private static final int MY_PERMISSIONS_REQUEST = 8976;
+  private FloatingActionButton refreshButton;
+  private Toolbar toolbar;
+  private SearchView searchView;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
-    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    toolbar = (Toolbar) findViewById(R.id.toolbar);
     setSupportActionBar(toolbar);
 
-    FloatingActionButton refreshButton = (FloatingActionButton) findViewById(R.id.fab);
+    refreshButton = (FloatingActionButton) findViewById(R.id.fab);
     refreshButton.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
         //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -82,11 +87,14 @@ public class MainActivity extends AppCompatActivity {
     FloatingActionButton addButton = (FloatingActionButton) findViewById(R.id.fab_add);
     addButton.setOnClickListener(new View.OnClickListener() {
       @Override public void onClick(View view) {
-        //TODO: uploadAllData();
+        uploadAllData();
+        Snackbar.make(view, "Sync feature", Snackbar.LENGTH_LONG)
+            //.setAction("Action", null)
+            .show();
       }
     });
     //Add all fragments here
-   addFragments();
+    addFragments();
   }
 
   private void addFragments() {
@@ -103,100 +111,119 @@ public class MainActivity extends AppCompatActivity {
     fragmentTransaction.add(R.id.content_main, StepCounterFragment_.builder().build(), StepCounterFragment.TAG);
     fragmentTransaction.add(R.id.content_main, ThermometerFragment_.builder().build(), ThermometerFragment.TAG);
 
-    fragmentTransaction.commitAllowingStateLoss();
+    fragmentTransaction.commit();
   }
 
   private void removeAllFragments() {
     FragmentManager fragmentManager = getSupportFragmentManager();
     FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 
-    fragmentTransaction.remove(fragmentManager.findFragmentByTag(AccelerometerFragment.TAG));
-    fragmentTransaction.remove(fragmentManager.findFragmentByTag(BarometerFragment.TAG));
-    fragmentTransaction.remove(fragmentManager.findFragmentByTag(BatteryFragment.TAG));
-    fragmentTransaction.remove(fragmentManager.findFragmentByTag(BluetoothFragment.TAG));
-    fragmentTransaction.remove(fragmentManager.findFragmentByTag(GPSFragment.TAG));
-    fragmentTransaction.remove(fragmentManager.findFragmentByTag(GyroscopeFragment.TAG));
-    fragmentTransaction.remove(fragmentManager.findFragmentByTag(NFCFragment.TAG));
-    fragmentTransaction.remove(fragmentManager.findFragmentByTag(ProximityFragment.TAG));
-    fragmentTransaction.remove(fragmentManager.findFragmentByTag(StepCounterFragment.TAG));
-    fragmentTransaction.remove(fragmentManager.findFragmentByTag(ThermometerFragment.TAG));
-
-    fragmentTransaction.commitAllowingStateLoss();
+    List<Fragment> fragmentList = fragmentManager.getFragments();
+    if (fragmentList != null) {
+      for (int i = fragmentList.size() - 1; i >= 0; --i) {
+        Fragment fragment = fragmentList.get(i);
+        if (fragment != null) {
+          fragmentTransaction.remove(fragment).commitNow();
+        }
+      }
+    }
   }
 
 
   @Override public void onActivityResult(int requestCode, int resultCode, Intent data) {
-    //switch (requestCode) {
-    //  case CommonUtils.REQUEST_CHECK_SETTINGS:
-    //    //INFO: Broadcast result to RN, handle however needed
-    //    Intent permissionResult = new Intent(HeroLocationModule.ACTION_GPS_PERMISSION_REQUEST);
-    //    permissionResult.putExtra("gps_check", resultCode == RESULT_OK ? "RESULT_OK" : "RESULT_CANCELLED");
-    //    sendBroadcast(permissionResult);
-    //    break;
-    //  case PLAY_SERVICES_RESOLUTION_REQUEST:
-    //    //TODO
-    //    if(resultCode!=RESULT_OK) {
-    //      //finish(); //dont allow app usage
-    //    }
-    //    break;
-    //  default:
-    //    super.onActivityResult(requestCode, resultCode, data);
-    //    break;
-    //}
+
+
   }
 
 
   private final OkHttpClient client = new OkHttpClient();
-  private final Gson gson = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
-      .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
-      .create();
 
   private void uploadAllData() {
+
+    new Thread(new Runnable() {
+      @Override public void run() {
+        try {
+          FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
+
+          List<String> jsonArray = new ArrayList<String>();
+          jsonArray.add(((ThermometerFragment) fragmentManager.findFragmentByTag(ThermometerFragment.TAG)).getData().toString());
+          jsonArray.add(((StepCounterFragment) fragmentManager.findFragmentByTag(StepCounterFragment.TAG)).getData().toString());
+          jsonArray.add(((ProximityFragment) fragmentManager.findFragmentByTag(ProximityFragment.TAG)).getData().toString());
+          jsonArray.add(((NFCFragment) fragmentManager.findFragmentByTag(NFCFragment.TAG)).getData().toString());
+          jsonArray.add(((GyroscopeFragment) fragmentManager.findFragmentByTag(GyroscopeFragment.TAG)).getData().toString());
+          jsonArray.add(((GPSFragment) fragmentManager.findFragmentByTag(GPSFragment.TAG)).getData().toString());
+          jsonArray.add(((BluetoothFragment) fragmentManager.findFragmentByTag(BluetoothFragment.TAG)).getData().toString());
+          jsonArray.add(((BatteryFragment) fragmentManager.findFragmentByTag(BatteryFragment.TAG)).getData().toString());
+          jsonArray.add(((BarometerFragment) fragmentManager.findFragmentByTag(BarometerFragment.TAG)).getData().toString());
+          jsonArray.add(((AccelerometerFragment) fragmentManager.findFragmentByTag(AccelerometerFragment.TAG))
+              .getData().toString());
+
+          final DeviceInfoDto deviceInfoDto = new DeviceInfoDto(jsonArray);
+
+          sendRequest(Constants.URLS.ADD_ENTRY, Constants.GSON.toJson(deviceInfoDto));
+
+          //TODO: do something with this shit addAppResponse
+        } catch (IOException | JSONException e) {
+          e.printStackTrace();
+        }
+      }
+    }).start();
+  }
+
+  private void sendRequest(String url, String postParams)
+      throws IOException {
+    RequestBody body = RequestBody.create(Constants.JSON_TYPE_MARKDOWN, postParams);
+    Request request = new Request.Builder()
+        .url(url)
+        .header("Authorization", PreferencesUtil.getToken(this))
+        .post(body)
+        .build();
+
+    Response response = client.newCall(request).execute();
+
     try {
-
-
-      String sayData = "[{\"gps\":{\"lat\":1234,\"lon\":-23.5,\"accuracy\":30}}]";//TODO:fetch all data
-
-      String jsonParams = gson.toJson(new DeviceInfoDto(sayData));
-
-      HashMap<String, String> headerMap = new HashMap<>();
-      headerMap.put("Content-Type", "application/json");
-      headerMap.put("Authorisation", PreferencesUtil.getToken(this));
-      Headers headers = Headers.of(headerMap);
-
-      APIResponseDto addAppResponse = sendRequest(Constants.URLS.ADD_ENTRY, headers, jsonParams, APIResponseDto.class);
-
-      //TODO: do something with this shit addAppResponse
-    } catch (IOException e) {
-      e.printStackTrace();
+      if (!response.isSuccessful()) {
+        handleFailure(response);
+      } else {
+        handleSuccess(response);
+      }
+    } catch (IOException ex) {
+      Log.e(TAG, "Some shit happened", ex);
     }
   }
 
-  private <T> T sendRequest(String url, Headers headers, String postParams, Class<T> clazz)
-      throws IOException {
-    Request request;
-    if (headers != null) {
-      request = new Request.Builder().url(url)
-          .headers(headers)
-          .post(RequestBody.create(Constants.MEDIA_TYPE_MARKDOWN, postParams))
-          .build();
+
+  void handleFailure(Response response) throws IOException {
+    APIResponseDto responseParse =
+        Constants.GSON.fromJson(new String(response.body().bytes()), APIResponseDto.class);
+    if (response.code() == 400 || response.code() == 500) {
+      Snackbar.make(refreshButton, responseParse.getMessage(), Snackbar.LENGTH_INDEFINITE)
+          .setAction("OK", null)
+          .show();
+    } else if (response.code() == 401) {
+      Snackbar.make(refreshButton, "Unauthorised", Snackbar.LENGTH_INDEFINITE)
+          .setAction("OK", null)
+          .show();
     } else {
-      request = new Request.Builder().url(url)
-          .post(RequestBody.create(Constants.MEDIA_TYPE_MARKDOWN, postParams))
-          .build();
+      Snackbar.make(refreshButton, "Unknown server error", Snackbar.LENGTH_INDEFINITE)
+          .setAction("OK", null)
+          .show();
     }
+  }
 
-    Response response = client.newCall(request).execute();
-    if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
-
-    Log.i(TAG, response.body().string());
-
-    T responseParse = gson.fromJson(response.body().charStream(), clazz);
+  void handleSuccess(Response response) throws IOException {
+    APIResponseDto responseParse = Constants.GSON.fromJson(new String(response.body().bytes()), APIResponseDto.class);
     //TODO: updated response
     Log.i(TAG, response.toString());
 
-    return responseParse;
+    if(responseParse.isStatus()) {
+      //TODO: what to do
+      Snackbar.make(refreshButton, responseParse.getMessage(), Snackbar.LENGTH_LONG).setAction("OK", null).show();
+    } else {
+      handleFailure(response);
+    }
   }
+
 
   BroadcastReceiver receiver = new BroadcastReceiver() {
     @Override public void onReceive(Context context, Intent intent) {
@@ -206,43 +233,51 @@ public class MainActivity extends AppCompatActivity {
     }
   };
 
+  @Override
+  public boolean onCreateOptionsMenu(Menu menu) {
+    getMenuInflater().inflate(R.menu.menu_main_activity, menu);
+    return true;
+  }
+
+  @Override public boolean onOptionsItemSelected(MenuItem item) {
+    if(item.getItemId() == R.id.action_search) {
+      startActivity(new Intent(this, SearchActivity.class));
+    }
+    return super.onOptionsItemSelected(item);
+  }
+
   @Override protected void onStart() {
     super.onStart();
     IntentFilter intentFilter = new IntentFilter("check_permission");
     registerReceiver(receiver, intentFilter);
+    checkPermissionShit();
   }
 
   private void checkPermissionShit() {
     // Here, thisActivity is the current activity
-
-    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) == PackageManager.PERMISSION_GRANTED
-        || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        || ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
-        || ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED
-        || ContextCompat.checkSelfPermission(this, Manifest.permission.BATTERY_STATS) == PackageManager.PERMISSION_GRANTED
-        || ContextCompat.checkSelfPermission(this, Manifest.permission.NFC) == PackageManager.PERMISSION_GRANTED) {
-
-      // Should we show an explanation?
-      if (ActivityCompat.shouldShowRequestPermissionRationale(this,
-          Manifest.permission.READ_PHONE_STATE)) {
-
-        // Show an expanation to the user *asynchronously* -- don't block
-        // this thread waiting for the user's response! After the user
-        // sees the explanation, try again to request the permission.
-
-      } else {
-
-        // No explanation needed, we can request the permission.
-
-        ActivityCompat.requestPermissions(this, new String[] {
-            Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.BLUETOOTH, Manifest.permission.BATTERY_STATS, Manifest.permission.NFC,
-        }, MY_PERMISSIONS_REQUEST);
-
-        // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-        // app-defined int constant. The callback method gets the
-        // result of the request.
+    String permissionArray[] = new String[] {
+        Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.BLUETOOTH, Manifest.permission.BATTERY_STATS, Manifest.permission.NFC,
+    };
+    for(String permission:permissionArray) {
+      if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+          Snackbar.make(refreshButton, "Grant permission in settings", Snackbar.LENGTH_INDEFINITE)
+              .setAction("OK", new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                  Log.i(TAG, "Grant permission in settings");
+                }
+              });
+        } else {
+          ActivityCompat.requestPermissions(this, new String[] { permission },
+              MY_PERMISSIONS_REQUEST);
+        }
       }
     }
+  }
+
+  @Override protected void onStop() {
+    unregisterReceiver(receiver);
+    super.onStop();
   }
 }

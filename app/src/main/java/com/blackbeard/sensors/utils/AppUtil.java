@@ -8,6 +8,8 @@ import android.os.Build;
 import android.provider.Settings;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 
@@ -66,5 +68,17 @@ public class AppUtil {
   //      break;
   //  }
   //}
+  }
+
+
+
+  public static void hideKeyBoard(View view) {
+    final InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+  }
+
+  public static void showKeyBoard(View view) {
+    final InputMethodManager imm = (InputMethodManager) view.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+    imm.showSoftInputFromInputMethod(view.getWindowToken(), 0);
   }
 }

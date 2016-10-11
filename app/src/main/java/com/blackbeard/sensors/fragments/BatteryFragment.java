@@ -6,19 +6,27 @@ import android.os.BatteryManager;
 import android.support.v4.app.Fragment;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
+import com.blackbeard.sensors.dto.BarometerDto;
+import com.blackbeard.sensors.dto.BatteryDto;
+import com.blackbeard.sensors.utils.Constants;
+import java.util.Locale;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class BatteryFragment extends Fragment {
   public static final String TAG = BatteryFragment.class.getSimpleName();
-  private final static String BATTERY_LEVEL = "level";
 
   @ViewById TextView title;
 
   @ViewById TextView content;
+
+  String isCharging, chargingType;
+  float level;
 
   @AfterViews  void init() {
     title.setText("Battery");
@@ -54,7 +62,20 @@ import org.androidannotations.annotations.ViewById;
   }
 
   @UiThread(propagation = UiThread.Propagation.REUSE)  void updateText(String isCharging, String chargingType, float level) {
-    content.setText("Charging:"+isCharging +" Type:"+chargingType+"\nAvailable:" + level + "%");
+    this.isCharging = isCharging;
+    this.chargingType = chargingType;
+    this.level = level;
+    content.setText(
+        String.format(Locale.ENGLISH,"Charging:%s Type:%s\nAvailable:%.0f%%", isCharging, chargingType, level));
   }
 
+  public JSONObject getData() throws JSONException {
+    BatteryDto bDto = new BatteryDto();
+    bDto.setChargingType(chargingType);
+    bDto.setIsCharging(isCharging);
+    bDto.setLevel(level);
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("thermometer", Constants.GSON.toJson(bDto));
+    return jsonObject;
+  }
 }

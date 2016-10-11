@@ -9,6 +9,9 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
+import com.blackbeard.sensors.dto.BatteryDto;
+import com.blackbeard.sensors.dto.BluetoothDto;
+import com.blackbeard.sensors.utils.Constants;
 import java.util.ArrayList;
 import java.util.Set;
 import org.androidannotations.annotations.AfterViews;
@@ -16,6 +19,8 @@ import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class BluetoothFragment extends Fragment {
   public static final String TAG = BluetoothFragment.class.getSimpleName();
@@ -30,6 +35,8 @@ import org.androidannotations.annotations.ViewById;
 
   private BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
   private ArrayList<String> devicesList = new ArrayList<>(5);
+  String status;
+  String bluetoothOnStatus;
 
   @AfterViews  void init() {
     title.setText("Bluetooth");
@@ -44,20 +51,20 @@ import org.androidannotations.annotations.ViewById;
       final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
       switch (state) {
         case BluetoothAdapter.STATE_OFF:
-          text += "off";
+          status += "off";
           break;
         case BluetoothAdapter.STATE_TURNING_OFF:
-          text += "switching-off";
+          status += "switching-off";
           break;
         case BluetoothAdapter.STATE_ON:
-          text += "on";
+          status += "on";
           break;
         case BluetoothAdapter.STATE_TURNING_ON:
-          text += "switching-on";
+          status += "switching-on";
           break;
       }
     }
-    updateText(text);
+    updateText(text+status);
   }
 
   @Receiver(actions = BluetoothAdapter.ACTION_STATE_CHANGED, registerAt = Receiver.RegisterAt.OnAttachOnDetach)
@@ -81,6 +88,7 @@ import org.androidannotations.annotations.ViewById;
       title = "Found ...";
     }
     Set<BluetoothDevice> pairedDevices = adapter.getBondedDevices();
+    devicesList.clear();
 
     if (pairedDevices.size() > 0) {
       for (BluetoothDevice device : pairedDevices) {
@@ -115,7 +123,8 @@ import org.androidannotations.annotations.ViewById;
 
   @UiThread(propagation = UiThread.Propagation.REUSE)  void updateOptionText(String text, ArrayList<String> list) {
     optionContent.setVisibility(View.VISIBLE);
-    optionContent.setText(text + "\n" + (list.size() > 0?list.toString():"No devices"));
+    bluetoothOnStatus = text;
+    optionContent.setText(text + "\n" + (list.size() > 0 ? list.toString() : "No devices"));
   }
 
 
@@ -126,5 +135,16 @@ import org.androidannotations.annotations.ViewById;
 
   @UiThread  void handlePostDetach() {
     adapter.cancelDiscovery();
+  }
+
+
+  public JSONObject getData() throws JSONException {
+    BluetoothDto bDto = new BluetoothDto();
+    bDto.setBluetoothOnStatus(bluetoothOnStatus);
+    bDto.setStatus(status);
+    bDto.setDevicesList(devicesList);
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("bluetooth", Constants.GSON.toJson(bDto));
+    return jsonObject;
   }
 }

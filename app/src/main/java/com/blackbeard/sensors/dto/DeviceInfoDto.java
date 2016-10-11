@@ -2,8 +2,11 @@ package com.blackbeard.sensors.dto;
 
 import android.content.Context;
 import com.bizapps.sensors.BuildConfig;
+import com.google.gson.JsonArray;
+import java.util.List;
 import lombok.Data;
 import lombok.ToString;
+import org.json.JSONArray;
 
 /**
  * Created by sudendra.kamble on 05/10/16.
@@ -17,9 +20,9 @@ public class DeviceInfoDto {
   String systemVersionName;//: Android M,
   String systemVersion;//: 21,
   String appVersion;//: 1.1.3,
-  String hardwareDetails;//: [ {gps:{lat:16.7457, lon:77.5643}} ]
+  List<String> hardwareDetails;//: [ {gps:{lat:16.7457, lon:77.5643}} ]
 
-  public DeviceInfoDto(String hardwareDetail) {
+  public DeviceInfoDto(List<String> hardwareDetail) {
     try {
       device = android.os.Build.BOARD;
       model = android.os.Build.BRAND;

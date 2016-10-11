@@ -7,12 +7,16 @@ import android.hardware.SensorManager;
 import android.support.v4.app.Fragment;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
+import com.blackbeard.sensors.dto.ProximityDto;
+import com.blackbeard.sensors.utils.Constants;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class ProximityFragment extends Fragment implements
     SensorEventListener{
@@ -25,6 +29,8 @@ import org.androidannotations.annotations.ViewById;
   @SystemService
   SensorManager sensorManager;
   Sensor senProximity;
+  float value;
+
   @AfterViews  void init() {
     title.setText("Proximity");
     updateText(0);
@@ -49,9 +55,9 @@ import org.androidannotations.annotations.ViewById;
     Sensor mySensor = sensorEvent.sensor;
 
     if (mySensor.getType() == Sensor.TYPE_PROXIMITY) {
-      float v1 = sensorEvent.values[0];
+      value = sensorEvent.values[0];
 
-      updateText(v1);
+      updateText(value);
     }
   }
 
@@ -61,4 +67,12 @@ import org.androidannotations.annotations.ViewById;
     sensorManager.unregisterListener(this);
   }
 
+  public JSONObject getData() throws JSONException {
+    ProximityDto aDto = new ProximityDto();
+    aDto.setAvailable(senProximity!=null);
+    aDto.setValue(value);
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("proximity", Constants.GSON.toJson(aDto));
+    return jsonObject;
+  }
 }

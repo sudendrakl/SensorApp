@@ -5,11 +5,16 @@ import android.nfc.NfcAdapter;
 import android.support.v4.app.Fragment;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
+import com.blackbeard.sensors.dto.GyroDto;
+import com.blackbeard.sensors.dto.NFCDto;
+import com.blackbeard.sensors.utils.Constants;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 //https://developer.android.com/guide/topics/connectivity/nfc/nfc.html
 //http://www.survivingwithandroid.com/2015/03/nfc-in-android-ndef-2.html
@@ -24,7 +29,7 @@ import org.androidannotations.annotations.ViewById;
 
   PackageManager pm;
 
-  private boolean available;
+  private boolean available, isEnabled;
   private NfcAdapter nfcAdapter;
 
   @AfterInject void init() {
@@ -38,7 +43,7 @@ import org.androidannotations.annotations.ViewById;
     updateText("Available:" + (available ? "yes" : "no"), null);
     if (nfcAdapter != null) {
       // device has NFC functionality
-      boolean isEnabled = false;
+      isEnabled = false;
       try {
         isEnabled = nfcAdapter.isEnabled();
       } catch (Exception e) {
@@ -53,4 +58,13 @@ import org.androidannotations.annotations.ViewById;
     if (text2 != null) content.append(text2);
   }
 
+
+  public JSONObject getData() throws JSONException {
+    NFCDto aDto = new NFCDto();
+    aDto.setAvailable(available);
+    aDto.setEnabled(isEnabled);
+    JSONObject jsonObject = new JSONObject();
+    jsonObject.put("nfc", Constants.GSON.toJson(aDto));
+    return jsonObject;
+  }
 }
