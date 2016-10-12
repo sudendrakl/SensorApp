@@ -28,11 +28,14 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH
 
   @Override public void onBindViewHolder(RecyclerVH holder, int position) {
     DeviceInfoDto deviceInfoDto = list.get(position);
-    holder.textView.setText(holder.textView.getContext()
-        .getString(R.string.device_info, deviceInfoDto.getDevice(), deviceInfoDto.getManufacturer(),
-            deviceInfoDto.getModel(), deviceInfoDto.getSystemVersion(),
-            deviceInfoDto.getSystemVersionName(), deviceInfoDto.getUserName(),
-            deviceInfoDto.getMailId()));
+    if(deviceInfoDto!=null) {
+      holder.textView.setText(holder.textView.getContext()
+          .getString(R.string.device_info, deviceInfoDto.getDevice(), deviceInfoDto.getManufacturer(),
+              deviceInfoDto.getModel(), deviceInfoDto.getSystemVersion(), deviceInfoDto.getSystemVersionName(),
+              deviceInfoDto.getUserName(), deviceInfoDto.getMailId()));
+    } else {
+      holder.textView.setText(R.string.zero_search_result);
+    }
   }
 
   @Override public int getItemCount() {
@@ -40,8 +43,13 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH
   }
 
   public void refresh(ArrayList<DeviceInfoDto> list) {
-    this.list.clear();
-    this.list.addAll(list);
+    if(list == null || list.size() == 0) {
+      this.list.clear();
+      this.list.add(null);
+    } else {
+      this.list.clear();
+      this.list.addAll(list);
+    }
     notifyDataSetChanged();
   }
 
@@ -53,4 +61,5 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH
       textView = (TextView) itemView.findViewById(R.id.textview);
     }
   }
+
 }

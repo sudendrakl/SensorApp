@@ -136,6 +136,10 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
           Response response = ((Response) responses[0]);
           String responseBody = (String) responses[1];
           try {
+            if(response==null || responseBody == null) {
+              handleFailure(response, responseBody);
+              return;
+            }
             Log.d(TAG, "Result --- " + responseBody);
             if (!response.isSuccessful()) {
               handleFailure(response, responseBody);
@@ -170,7 +174,15 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
 
   void handleFailure(Response response, String responseBody) throws IOException, JsonSyntaxException {
-    APIResponseDto responseParse =
+    if(response==null || responseBody == null) {
+      Snackbar.make(searchView, "Failed to search, please check n/w", Snackbar.LENGTH_INDEFINITE)
+          .setAction("OK", null)
+          .show();
+      searchAdapter.refresh(null);
+      return;
+    }
+
+      APIResponseDto responseParse =
         Constants.GSON.fromJson(responseBody, APIResponseDto.class);
     if (response.code() == 400 || response.code() == 500) {
       Snackbar.make(searchView, responseParse.getMessage(), Snackbar.LENGTH_INDEFINITE)
@@ -189,11 +201,9 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
   void handleSuccess(Response response, String responseBody) throws IOException {
     SearchResultDto responseParse = Constants.GSON.fromJson(responseBody, SearchResultDto.class);
-    //TODO: updated response
     Log.i(TAG, response.toString());
 
     if(responseParse.isStatus()) {
-      //TODO: what to do
       Snackbar.make(searchView, responseParse.getMessage(), Snackbar.LENGTH_LONG).setAction("OK", null).show();
       searchAdapter.refresh(responseParse.getResponse());
 
