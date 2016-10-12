@@ -9,10 +9,9 @@ import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
-import com.blackbeard.sensors.dto.BatteryDto;
 import com.blackbeard.sensors.dto.BluetoothDto;
-import com.blackbeard.sensors.utils.Constants;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -20,7 +19,6 @@ import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class BluetoothFragment extends Fragment {
   public static final String TAG = BluetoothFragment.class.getSimpleName();
@@ -138,13 +136,13 @@ import org.json.JSONObject;
   }
 
 
-  public JSONObject getData() throws JSONException {
+  public HashMap<String, BluetoothDto> getData() throws JSONException {
     BluetoothDto bDto = new BluetoothDto();
     bDto.setBluetoothOnStatus(bluetoothOnStatus);
     bDto.setStatus(status);
     bDto.setDevicesList(devicesList);
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("bluetooth", Constants.GSON.toJson(bDto));
-    return jsonObject;
+    HashMap<String, BluetoothDto> hashMap = new HashMap<>(1);
+    hashMap.put("bluetooth", bDto);
+    return  hashMap;//Constants.GSON.toJson(hashMap);
   }
 }

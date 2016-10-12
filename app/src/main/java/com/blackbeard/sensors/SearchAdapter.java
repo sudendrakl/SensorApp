@@ -8,7 +8,6 @@ import android.widget.TextView;
 import com.bizapps.sensors.R;
 import com.blackbeard.sensors.dto.DeviceInfoDto;
 import java.util.ArrayList;
-import org.w3c.dom.Text;
 
 /**
  * Created by sudendra.kamble on 12/10/16.
@@ -16,17 +15,24 @@ import org.w3c.dom.Text;
 
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH> {
   ArrayList<DeviceInfoDto> list;
-  public SearchAdapter(ArrayList<DeviceInfoDto> list){
+
+  public SearchAdapter(ArrayList<DeviceInfoDto> list) {
     super();
     this.list = list;
   }
+
   @Override public RecyclerVH onCreateViewHolder(ViewGroup parent, int viewType) {
-    return new RecyclerVH(LayoutInflater.from(parent.getContext()).inflate(R.layout.search_item, parent, false));
+    return new RecyclerVH(
+        LayoutInflater.from(parent.getContext()).inflate(R.layout.search_item, parent, false));
   }
 
   @Override public void onBindViewHolder(RecyclerVH holder, int position) {
     DeviceInfoDto deviceInfoDto = list.get(position);
-    holder.textView.setText(deviceInfoDto.toString());
+    holder.textView.setText(holder.textView.getContext()
+        .getString(R.string.device_info, deviceInfoDto.getDevice(), deviceInfoDto.getManufacturer(),
+            deviceInfoDto.getModel(), deviceInfoDto.getSystemVersion(),
+            deviceInfoDto.getSystemVersionName(), deviceInfoDto.getUserName(),
+            deviceInfoDto.getMailId()));
   }
 
   @Override public int getItemCount() {
@@ -41,6 +47,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH
 
   class RecyclerVH extends RecyclerView.ViewHolder {
     TextView textView;
+
     public RecyclerVH(View itemView) {
       super(itemView);
       textView = (TextView) itemView.findViewById(R.id.textview);

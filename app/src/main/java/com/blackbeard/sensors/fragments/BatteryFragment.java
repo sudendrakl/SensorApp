@@ -6,9 +6,8 @@ import android.os.BatteryManager;
 import android.support.v4.app.Fragment;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
-import com.blackbeard.sensors.dto.BarometerDto;
 import com.blackbeard.sensors.dto.BatteryDto;
-import com.blackbeard.sensors.utils.Constants;
+import java.util.HashMap;
 import java.util.Locale;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -16,7 +15,6 @@ import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class BatteryFragment extends Fragment {
   public static final String TAG = BatteryFragment.class.getSimpleName();
@@ -69,13 +67,13 @@ import org.json.JSONObject;
         String.format(Locale.ENGLISH,"Charging:%s Type:%s\nAvailable:%.0f%%", isCharging, chargingType, level));
   }
 
-  public JSONObject getData() throws JSONException {
+  public HashMap<String, BatteryDto> getData() throws JSONException {
     BatteryDto bDto = new BatteryDto();
     bDto.setChargingType(chargingType);
     bDto.setIsCharging(isCharging);
     bDto.setLevel(level);
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("thermometer", Constants.GSON.toJson(bDto));
-    return jsonObject;
+    HashMap<String, BatteryDto> hashMap = new HashMap<>(1);
+    hashMap.put("battery", bDto);
+    return  hashMap;//Constants.GSON.toJson(hashMap);
   }
 }

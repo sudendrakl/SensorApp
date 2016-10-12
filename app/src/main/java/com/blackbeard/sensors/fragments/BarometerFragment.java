@@ -8,9 +8,8 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
-import com.blackbeard.sensors.dto.AccelerometerDto;
 import com.blackbeard.sensors.dto.BarometerDto;
-import com.blackbeard.sensors.utils.Constants;
+import java.util.HashMap;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -18,7 +17,6 @@ import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class BarometerFragment extends Fragment implements
     SensorEventListener{
@@ -79,13 +77,13 @@ import org.json.JSONObject;
   }
 
 
-  public JSONObject getData() throws JSONException {
+  public HashMap<String, BarometerDto> getData() throws JSONException {
     BarometerDto bDto = new BarometerDto();
     bDto.setAvailable(senPressure!=null);
     bDto.setEnabled(isEnabled);
     bDto.setPressure(pressure);
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("barometer", Constants.GSON.toJson(bDto));
-    return jsonObject;
+    HashMap<String, BarometerDto> hashMap = new HashMap<>(1);
+    hashMap.put("barometer",bDto);
+    return  hashMap;//Constants.GSON.toJson(hashMap);
   }
 }

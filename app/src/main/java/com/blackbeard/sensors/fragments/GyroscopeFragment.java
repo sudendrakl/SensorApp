@@ -8,9 +8,8 @@ import android.hardware.SensorManager;
 import android.support.v4.app.Fragment;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
-import com.blackbeard.sensors.dto.GPSDto;
 import com.blackbeard.sensors.dto.GyroDto;
-import com.blackbeard.sensors.utils.Constants;
+import java.util.HashMap;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -18,7 +17,6 @@ import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class GyroscopeFragment extends Fragment implements
     SensorEventListener{
@@ -77,14 +75,15 @@ import org.json.JSONObject;
   @Override public void onAccuracyChanged(Sensor sensor, int accuracy) {}
 
 
-  public JSONObject getData() throws JSONException {
+  public HashMap<String, GyroDto> getData() throws JSONException {
     GyroDto aDto = new GyroDto();
     aDto.setAvailable(available);
     aDto.setV1(v1);
     aDto.setV2(v2);
     aDto.setV3(v3);
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("gyroscope", Constants.GSON.toJson(aDto));
-    return jsonObject;
+
+    HashMap<String, GyroDto> hashMap = new HashMap<>(1);
+    hashMap.put("gyroscope", aDto);
+    return hashMap;// Constants.GSON.toJson(hashMap);
   }
 }

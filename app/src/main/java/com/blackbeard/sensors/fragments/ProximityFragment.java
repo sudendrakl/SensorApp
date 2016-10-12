@@ -8,7 +8,7 @@ import android.support.v4.app.Fragment;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
 import com.blackbeard.sensors.dto.ProximityDto;
-import com.blackbeard.sensors.utils.Constants;
+import java.util.HashMap;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -16,7 +16,6 @@ import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class ProximityFragment extends Fragment implements
     SensorEventListener{
@@ -67,12 +66,14 @@ import org.json.JSONObject;
     sensorManager.unregisterListener(this);
   }
 
-  public JSONObject getData() throws JSONException {
+  public HashMap<String, ProximityDto> getData() throws JSONException {
     ProximityDto aDto = new ProximityDto();
     aDto.setAvailable(senProximity!=null);
     aDto.setValue(value);
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("proximity", Constants.GSON.toJson(aDto));
-    return jsonObject;
+
+    HashMap<String, ProximityDto> hashMap = new HashMap<>(1);
+    hashMap.put("proximity", aDto);
+    return hashMap;// Constants.GSON.toJson(hashMap);
+
   }
 }

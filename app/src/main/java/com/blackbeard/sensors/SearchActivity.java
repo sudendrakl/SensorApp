@@ -1,13 +1,14 @@
 package com.blackbeard.sensors;
 
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
-import android.content.Intent;
+import android.os.AsyncTask;
+import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
@@ -42,6 +43,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
   private final OkHttpClient client = new OkHttpClient();
   private RecyclerView recyclerView;
   private SearchAdapter searchAdapter = new SearchAdapter(new ArrayList<DeviceInfoDto>());
+  private ProgressDialog progressDialog;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -63,6 +65,17 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     LinearLayoutManager ll = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
     recyclerView.setLayoutManager(ll);
     recyclerView.setAdapter(searchAdapter);
+    progressDialog = new ProgressDialog(this);
+    progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+  }
+
+  void showProgressDialog(){
+    progressDialog.setMessage("Searching...");
+    progressDialog.show();
+  }
+
+  void hideProgressDialog(){
+    progressDialog.hide();
   }
 
   @Override
@@ -90,28 +103,57 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
   }
 
   @Override
-  public boolean onQueryTextSubmit(final String query) {
+  public boolean onQueryTextSubmit(String query) {
     // this is your adapter that will be filtered
     AppUtil.hideKeyBoard(searchView);
+    showProgressDialog();
     if (!TextUtils.isEmpty(query)) {
-      new Thread(new Runnable() {
-        @Override public void run() {
+      AsyncTask<String, Void, Object[]> asyncTask = new AsyncTask<String, Void, Object[]>() {
+        @Override protected void onPreExecute() {
+          showProgressDialog();
+        }
+
+        @Override protected Object[] doInBackground(String[] params) {
+          String responseBody = null;
+          Response response = null;
           try {
-            HashMap<String, String[]> params = new HashMap<>(2);
-            params.put("search_params", new String[]{query});
-            params.put("search_values", new String[]{query});
-            sendRequest(Constants.URLS.SEARCH, Constants.GSON.toJson(query));
+            HashMap<String, String[]> searchParams = new HashMap<>(2);
+            searchParams.put("search_params", new String[] { "user_name" });//TODO: change this to simple 1 query thing
+            searchParams.put("search_values", new String[] { params[0] });
+            response = sendRequest(Constants.URLS.SEARCH, Constants.GSON.toJson(searchParams));
+
+            responseBody = new String(response.body().bytes());
+
           } catch (IOException e) {
             e.printStackTrace();
+            Log.e(TAG, "Some shit happened....", e);
+          }
+          return new Object[] { response, responseBody };
+        }
+
+        @Override protected void onPostExecute(Object[] responses) {
+          hideProgressDialog();
+          Response response = ((Response) responses[0]);
+          String responseBody = (String) responses[1];
+          try {
+            Log.d(TAG, "Result --- " + responseBody);
+            if (!response.isSuccessful()) {
+              handleFailure(response, responseBody);
+            } else {
+              handleSuccess(response, responseBody);
+            }
+          } catch (IOException | JsonSyntaxException ex) {
+            Log.e(TAG, "Some shit happened...." + responseBody, ex);
           }
         }
-      }).start();
+      };
+      asyncTask.execute(query);
     }
     return true;
   }
 
 
-  private void sendRequest(String url, String postParams)
+  private Response sendRequest(String url, String postParams)
       throws IOException {
 
     RequestBody body = RequestBody.create(Constants.JSON_TYPE_MARKDOWN, postParams);
@@ -122,16 +164,8 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         .build();
 
     Response response = client.newCall(request).execute();
-    String responseBody = new String(response.body().bytes());
-    try {
-      if (!response.isSuccessful()) {
-        handleFailure(response,responseBody);
-      } else {
-        handleSuccess(response,responseBody);
-      }
-    } catch (IOException|JsonSyntaxException ex) {
-      Log.e(TAG, "Some shit happened...." + responseBody, ex);
-    }
+
+    return response;
   }
 
 

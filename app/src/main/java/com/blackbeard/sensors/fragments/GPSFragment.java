@@ -2,21 +2,19 @@ package com.blackbeard.sensors.fragments;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
-import com.blackbeard.sensors.BackgroundLocationService;
 import com.bizapps.sensors.R;
-import com.blackbeard.sensors.dto.AccelerometerDto;
+import com.blackbeard.sensors.BackgroundLocationService;
 import com.blackbeard.sensors.dto.GPSDto;
 import com.blackbeard.sensors.utils.Constants;
 import com.blackbeard.sensors.utils.LocationUtils;
 import com.google.android.gms.location.LocationResult;
-import java.util.ArrayList;
+import java.util.HashMap;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -24,7 +22,6 @@ import org.androidannotations.annotations.Receiver;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class GPSFragment extends Fragment {
   public static final String TAG = GPSFragment.class.getSimpleName();
@@ -98,15 +95,16 @@ import org.json.JSONObject;
   }
 
 
-  public JSONObject getData() throws JSONException {
+  public HashMap<String, GPSDto> getData() throws JSONException {
     GPSDto aDto = new GPSDto();
     aDto.setEnabled(isEnabled);
     aDto.setAccuracyMode(accuracyMode);
     aDto.setAvailable(isAvailable);
     aDto.setProvider(provider);
     aDto.setLocation(location);
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("gps", Constants.GSON.toJson(aDto));
-    return jsonObject;
+
+    HashMap<String, GPSDto> hashMap = new HashMap<>(1);
+    hashMap.put("gps", aDto);
+    return hashMap;// Constants.GSON.toJson(hashMap);
   }
 }

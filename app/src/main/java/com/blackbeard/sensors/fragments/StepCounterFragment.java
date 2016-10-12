@@ -10,10 +10,8 @@ import android.support.v4.app.Fragment;
 import android.view.View;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
-import com.blackbeard.sensors.dto.ProximityDto;
 import com.blackbeard.sensors.dto.StepsDto;
-import com.blackbeard.sensors.utils.Constants;
-import java.util.ArrayList;
+import java.util.HashMap;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -21,9 +19,6 @@ import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
-import org.json.JSONObject;
-
-import static android.R.attr.value;
 
 //https://developer.android.com/guide/topics/connectivity/nfc/nfc.html
 //http://www.survivingwithandroid.com/2015/03/nfc-in-android-ndef-2.html
@@ -118,13 +113,15 @@ import static android.R.attr.value;
     super.onDetach();
   }
 
-  public JSONObject getData() throws JSONException {
+  public HashMap<String, StepsDto> getData() throws JSONException {
     StepsDto aDto = new StepsDto();
     aDto.setAvailableStepCounter(availableStepCounter);
     aDto.setAvailableStepDetector(availableStepDetector);
     aDto.setSteps(mSteps);
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("step_counter", Constants.GSON.toJson(aDto));
-    return jsonObject;
+
+    HashMap<String, StepsDto> hashMap = new HashMap<>(1);
+    hashMap.put("step_counter", aDto);
+    return hashMap;// Constants.GSON.toJson(hashMap);
+
   }
 }

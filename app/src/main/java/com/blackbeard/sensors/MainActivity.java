@@ -1,9 +1,7 @@
 package com.blackbeard.sensors;
 
 import android.Manifest;
-import android.app.SearchManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -16,7 +14,6 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
@@ -145,18 +142,17 @@ public class MainActivity extends AppCompatActivity {
         try {
           FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
 
-          List<String> jsonArray = new ArrayList<String>();
-          jsonArray.add(((ThermometerFragment) fragmentManager.findFragmentByTag(ThermometerFragment.TAG)).getData().toString());
-          jsonArray.add(((StepCounterFragment) fragmentManager.findFragmentByTag(StepCounterFragment.TAG)).getData().toString());
-          jsonArray.add(((ProximityFragment) fragmentManager.findFragmentByTag(ProximityFragment.TAG)).getData().toString());
-          jsonArray.add(((NFCFragment) fragmentManager.findFragmentByTag(NFCFragment.TAG)).getData().toString());
-          jsonArray.add(((GyroscopeFragment) fragmentManager.findFragmentByTag(GyroscopeFragment.TAG)).getData().toString());
-          jsonArray.add(((GPSFragment) fragmentManager.findFragmentByTag(GPSFragment.TAG)).getData().toString());
-          jsonArray.add(((BluetoothFragment) fragmentManager.findFragmentByTag(BluetoothFragment.TAG)).getData().toString());
-          jsonArray.add(((BatteryFragment) fragmentManager.findFragmentByTag(BatteryFragment.TAG)).getData().toString());
-          jsonArray.add(((BarometerFragment) fragmentManager.findFragmentByTag(BarometerFragment.TAG)).getData().toString());
-          jsonArray.add(((AccelerometerFragment) fragmentManager.findFragmentByTag(AccelerometerFragment.TAG))
-              .getData().toString());
+          List jsonArray = new ArrayList();
+          jsonArray.add(((ThermometerFragment) fragmentManager.findFragmentByTag(ThermometerFragment.TAG)).getData());
+          jsonArray.add(((StepCounterFragment) fragmentManager.findFragmentByTag(StepCounterFragment.TAG)).getData());
+          jsonArray.add(((ProximityFragment) fragmentManager.findFragmentByTag(ProximityFragment.TAG)).getData());
+          jsonArray.add(((NFCFragment) fragmentManager.findFragmentByTag(NFCFragment.TAG)).getData());
+          jsonArray.add(((GyroscopeFragment) fragmentManager.findFragmentByTag(GyroscopeFragment.TAG)).getData());
+          jsonArray.add(((GPSFragment) fragmentManager.findFragmentByTag(GPSFragment.TAG)).getData());
+          jsonArray.add(((BluetoothFragment) fragmentManager.findFragmentByTag(BluetoothFragment.TAG)).getData());
+          jsonArray.add(((BatteryFragment) fragmentManager.findFragmentByTag(BatteryFragment.TAG)).getData());
+          jsonArray.add(((BarometerFragment) fragmentManager.findFragmentByTag(BarometerFragment.TAG)).getData());
+          jsonArray.add(((AccelerometerFragment) fragmentManager.findFragmentByTag(AccelerometerFragment.TAG)).getData());
 
           final DeviceInfoDto deviceInfoDto = new DeviceInfoDto(jsonArray);
 

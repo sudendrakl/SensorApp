@@ -7,9 +7,8 @@ import android.hardware.SensorManager;
 import android.support.v4.app.Fragment;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
-import com.blackbeard.sensors.dto.StepsDto;
 import com.blackbeard.sensors.dto.ThermometerDto;
-import com.blackbeard.sensors.utils.Constants;
+import java.util.HashMap;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -17,7 +16,6 @@ import org.androidannotations.annotations.SystemService;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 @EFragment(R.layout.fragment_plus_one) public class ThermometerFragment extends Fragment implements
     SensorEventListener{
@@ -69,12 +67,12 @@ import org.json.JSONObject;
     sensorManager.unregisterListener(this);
   }
 
-  public JSONObject getData() throws JSONException {
+  public HashMap<String, ThermometerDto> getData() throws JSONException {
     ThermometerDto aDto = new ThermometerDto();
     aDto.setValue(ambientTemperatureCelcius);
     aDto.setAvailable(senTemperature != null);
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("thermometer", Constants.GSON.toJson(aDto));
-    return jsonObject;
+    HashMap<String, ThermometerDto> hashMap = new HashMap<>(1);
+    hashMap.put("thermometer", aDto);
+    return hashMap;//Constants.GSON.toJson(hashMap);
   }
 }

@@ -5,16 +5,14 @@ import android.nfc.NfcAdapter;
 import android.support.v4.app.Fragment;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
-import com.blackbeard.sensors.dto.GyroDto;
 import com.blackbeard.sensors.dto.NFCDto;
-import com.blackbeard.sensors.utils.Constants;
+import java.util.HashMap;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.UiThread;
 import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 //https://developer.android.com/guide/topics/connectivity/nfc/nfc.html
 //http://www.survivingwithandroid.com/2015/03/nfc-in-android-ndef-2.html
@@ -59,12 +57,14 @@ import org.json.JSONObject;
   }
 
 
-  public JSONObject getData() throws JSONException {
+  public HashMap<String, NFCDto> getData() throws JSONException {
     NFCDto aDto = new NFCDto();
     aDto.setAvailable(available);
     aDto.setEnabled(isEnabled);
-    JSONObject jsonObject = new JSONObject();
-    jsonObject.put("nfc", Constants.GSON.toJson(aDto));
-    return jsonObject;
+
+    HashMap<String, NFCDto> hashMap = new HashMap<>(1);
+    hashMap.put("nfc", aDto);
+    return hashMap;// Constants.GSON.toJson(hashMap);
+
   }
 }
