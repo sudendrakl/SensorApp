@@ -33,7 +33,7 @@ public class DeviceInfoDto {
 
       systemVersion = android.os.Build.VERSION.RELEASE;
       Field[] fields = Build.VERSION_CODES.class.getFields();
-      systemVersionName = fields[Build.VERSION.SDK_INT + 1].getName();
+      systemVersionName = "Android "+fields[Build.VERSION.SDK_INT + 1].getName();
       appVersion = BuildConfig.VERSION_NAME;
       hardwareDetails = hardwareDetail;
     } catch (Exception e) {
