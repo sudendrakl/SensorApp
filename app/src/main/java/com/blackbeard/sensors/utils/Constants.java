@@ -30,4 +30,6 @@ public interface Constants {
   Gson GSON = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
   .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
   .create();
+
+  long UPDATE_UI_DELAY = 1000;
 }

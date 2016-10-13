@@ -9,7 +9,11 @@ import android.support.v4.app.Fragment;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
 import com.blackbeard.sensors.dto.GyroDto;
+import com.blackbeard.sensors.utils.Constants;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -34,22 +38,31 @@ import org.json.JSONException;
   boolean available;
   float v1,v2,v3;
 
+  Timer timer;
+  TimerTask timerTask;
+
   @AfterInject  void initSensor() {
     senGyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
     sensorManager.registerListener(this, senGyroscope, SensorManager.SENSOR_DELAY_NORMAL);
     pm = getActivity().getPackageManager();
     available = pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_GYROSCOPE);
+    timer = new Timer();
+    timerTask = new TimerTask() {
+      @Override public void run() {
+        updateText();
+      }
+    };
   }
 
   @AfterViews  void init() {
     title.setText("Gyroscope");
-    content.setText("Available:" + (available?"yes":"no"));
+    content.setText(String.format("Available:%s", available ? "yes" : "no"));
+    timer.scheduleAtFixedRate(timerTask, 0, Constants.UPDATE_UI_DELAY);
   }
 
-  @UiThread(propagation = UiThread.Propagation.REUSE)  void updateText(float v1, float v2,
-      float v3) {
+  @UiThread(propagation = UiThread.Propagation.REUSE)  void updateText() {
     content.setText(String.format("Available:%s\n", available ? "yes" : "no"));
-    content.append("V1:" + v1 + "  V2:" + v2 + " V3:" + v3);
+    content.append(String.format(Locale.ENGLISH, "V1:%.2f  V2:%.2f V3:%.2f", v1, v2, v3));
   }
 
   @Override public void onDetach() {
@@ -59,6 +72,7 @@ import org.json.JSONException;
 
   @UiThread void handlePostDetach() {
     sensorManager.unregisterListener(this);
+    timer.cancel();
   }
 
   @Override public void onSensorChanged(SensorEvent sensorEvent) {
@@ -68,7 +82,8 @@ import org.json.JSONException;
       v1 = sensorEvent.values[0];
       v2 = sensorEvent.values[1];
       v3 = sensorEvent.values[2];
-      updateText(v1,v2,v3);
+      //INFO: ui updated with timer task
+      // updateText(v1,v2,v3);
     }
   }
 

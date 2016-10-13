@@ -15,6 +15,9 @@ import com.blackbeard.sensors.utils.Constants;
 import com.blackbeard.sensors.utils.LocationUtils;
 import com.google.android.gms.location.LocationResult;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -38,16 +41,31 @@ import org.json.JSONException;
   String provider;
   String accuracyMode;
   Location location;
+  Timer timer;
+  TimerTask timerTask;
 
   @AfterInject  void init() {
     context = getActivity();
 
     Intent intent = new Intent(context, BackgroundLocationService.class);
     context.startService(intent);
+    timer = new Timer();
+    timerTask = new TimerTask() {
+      @Override public void run() {
+        if (location != null) updateOptionText();
+      }
+    };
   }
 
   @AfterViews  void initViews() {
     title.setText("GPS");
+    updateStatus();
+    if (isAvailable & isEnabled) {
+      timer.scheduleAtFixedRate(timerTask, 0, Constants.UPDATE_UI_DELAY);
+    }
+  }
+
+  private void updateStatus() {
     isAvailable = LocationUtils.hasGPS(context);
     provider = LocationUtils.getProvider(context);
     isEnabled = LocationUtils.isGPSEnabled(context);
@@ -68,9 +86,10 @@ import org.json.JSONException;
       Log.d(TAG,
           "accuracy: " + location.getAccuracy() + " lat: " + location.getLatitude() + " lon: "
               + location.getLongitude());
-      updateOptionText(location);
+      //INFO: ui updated with timer task
+      //updateOptionText(location);
     }
-    initViews();
+    updateStatus();
   }
 
   @UiThread(propagation = UiThread.Propagation.REUSE)  void updateText(String text) {
@@ -78,10 +97,11 @@ import org.json.JSONException;
   }
 
 
-  @UiThread(propagation = UiThread.Propagation.REUSE)  void updateOptionText(@NonNull Location location) {
+  @UiThread(propagation = UiThread.Propagation.REUSE)  void updateOptionText() {
     optionContent.setVisibility(View.VISIBLE);
-    optionContent.setText("Latitude:" + location.getLatitude() + "  Longitude:" + location.getLongitude()
-        + " Accuracy:" + location.getAccuracy());
+    optionContent.setText(
+        String.format(Locale.ENGLISH, "Latitude:%.3f  Longitude:%.3f Accuracy:%.3s", location.getLatitude(),
+            location.getLongitude(), location.getAccuracy()));
   }
   
   @Override public void onDetach() {
@@ -92,6 +112,7 @@ import org.json.JSONException;
   @UiThread  void handlePostDetach() {
     Intent intent = new Intent(context, BackgroundLocationService.class);
     context.stopService(intent);
+    timer.cancel();
   }
 
 

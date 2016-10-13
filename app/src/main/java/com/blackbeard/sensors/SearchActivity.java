@@ -107,7 +107,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     // this is your adapter that will be filtered
     AppUtil.hideKeyBoard(searchView);
     showProgressDialog();
-    if (!TextUtils.isEmpty(query)) {
+    if (!TextUtils.isEmpty(query.trim())) {
       AsyncTask<String, Void, Object[]> asyncTask = new AsyncTask<String, Void, Object[]>() {
         @Override protected void onPreExecute() {
           showProgressDialog();
@@ -150,8 +150,13 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
             Log.e(TAG, "Some shit happened...." + responseBody, ex);
           }
         }
+
+        @Override protected void onCancelled() {
+          super.onCancelled();
+          hideProgressDialog();
+        }
       };
-      asyncTask.execute(query);
+      asyncTask.execute(query.trim());
     }
     return true;
   }

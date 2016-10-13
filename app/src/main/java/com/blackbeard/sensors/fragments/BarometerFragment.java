@@ -9,7 +9,11 @@ import android.view.View;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
 import com.blackbeard.sensors.dto.BarometerDto;
+import com.blackbeard.sensors.utils.Constants;
 import java.util.HashMap;
+import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.androidannotations.annotations.AfterInject;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
@@ -33,29 +37,38 @@ import org.json.JSONException;
   Sensor senPressure;
   float pressure;
   boolean isEnabled;
+  Timer timer;
+  TimerTask timerTask;
 
   @AfterViews  void init() {
     title.setText("Barometer");
-    updateText("Available:" + (senPressure!=null ? "yes" : "no"));
-
+    updateText("Available:" + (senPressure != null ? "yes" : "no"));
+    if (senPressure != null) timer.scheduleAtFixedRate(timerTask, 0, Constants.UPDATE_UI_DELAY);
   }
 
   @AfterInject  void initSensor() {
     senPressure = sensorManager.getDefaultSensor(Sensor.TYPE_PRESSURE);
     sensorManager.registerListener(this, senPressure, SensorManager.SENSOR_DELAY_NORMAL);
+    timer = new Timer();
+    timerTask = new TimerTask() {
+      @Override public void run() {
+        updateOptionText();
+      }
+    };
   }
 
   @UiThread(propagation = UiThread.Propagation.REUSE) void updateText(String text) {
     content.setText(text);
   }
 
-  @UiThread(propagation = UiThread.Propagation.REUSE)  void updateOptionText(String text) {
+  @UiThread(propagation = UiThread.Propagation.REUSE)  void updateOptionText() {
     optionContent.setVisibility(View.VISIBLE);
-    optionContent.setText(text);
+    optionContent.setText(String.format(Locale.ENGLISH, "Pressure:%.2f", pressure));
   }
 
   @Override public void onDetach() {
     handlePostDetach();
+    timer.cancel();
     super.onDetach();
   }
 
@@ -65,8 +78,7 @@ import org.json.JSONException;
     isEnabled = true;
     if (mySensor.getType() == Sensor.TYPE_PRESSURE) {
       pressure = sensorEvent.values[0];
-
-      updateOptionText(String.format("Pressure:%s", pressure));
+      //INFO: ui updated with timer task
     }
   }
 
@@ -74,6 +86,7 @@ import org.json.JSONException;
 
   @UiThread  void handlePostDetach() {
     sensorManager.unregisterListener(this);
+    timer.cancel();
   }
 
 

@@ -55,7 +55,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
    */
   private static final int REQUEST_READ_CONTACTS = 0;
   private static final String TAG = LoginActivity.class.getSimpleName();
-  private static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 123;
+  private static final int PERMISSION_REQUEST_CODE = 123;
 
   private UserLoginTask mAuthTask = null;
 
@@ -97,7 +97,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
   @Override protected void onStart() {
     super.onStart();
     String token = PreferencesUtil.getToken(this);
-    //TODO
     if (!TextUtils.isEmpty(token)) {
       finish();
       Intent intent = new Intent(this, MainActivity.class);
@@ -107,55 +106,29 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     checkPermissionShit();
   }
 
-  private void checkPermissionShit() {
+  private boolean checkPermissionShit() {
     // Here, thisActivity is the current activity
-
-    if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
-        && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        && ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-        && ContextCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED
-        && ContextCompat.checkSelfPermission(this, Manifest.permission.BATTERY_STATS) != PackageManager.PERMISSION_GRANTED
-        && ContextCompat.checkSelfPermission(this, Manifest.permission.NFC) != PackageManager.PERMISSION_GRANTED
-        ) {
-
-      // Should we show an explanation?
-      if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.READ_PHONE_STATE)
-          ||ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-          ||ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)
-          ||ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.BLUETOOTH)
-          ||ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.BATTERY_STATS)
-          ||ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.NFC)
-          ) {
-
-        // Show an expanation to the user *asynchronously* -- don't block
-        // this thread waiting for the user's response! After the user
-        // sees the explanation, try again to request the permission.
-        Snackbar.make(mLoginFormView, "Grant permission in settings", Snackbar.LENGTH_INDEFINITE).setAction(
-            "OK", new View.OnClickListener() {
-              @Override public void onClick(View v) {
-                Log.i(TAG, "Grant permission in settings");
-              }
-            });
-      } else {
-
-        // No explanation needed, we can request the permission.
-
-        ActivityCompat.requestPermissions(this,
-            new String[] { Manifest.permission.READ_PHONE_STATE,
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-                Manifest.permission.BLUETOOTH,
-                Manifest.permission.BATTERY_STATS,
-                Manifest.permission.NFC,
-
-            },
-            MY_PERMISSIONS_REQUEST_READ_CONTACTS);
-
-        // MY_PERMISSIONS_REQUEST_READ_CONTACTS is an
-        // app-defined int constant. The callback method gets the
-        // result of the request.
+    String permissionArray[] = new String[] {
+        Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.BLUETOOTH, Manifest.permission.BATTERY_STATS, Manifest.permission.NFC,
+    };
+    for(final String permission:permissionArray) {
+      if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
+          Snackbar.make(mNameView, "Please grant permission in settings", Snackbar.LENGTH_INDEFINITE)
+              .setAction("OK", new View.OnClickListener() {
+                @Override public void onClick(View v) {
+                  Log.i(TAG, "Grant permission in settings");
+                  ActivityCompat.requestPermissions(LoginActivity.this, new String[] { permission }, PERMISSION_REQUEST_CODE);
+                }
+              }).show();
+          return false;
+        } else {
+          ActivityCompat.requestPermissions(this, new String[] { permission }, PERMISSION_REQUEST_CODE);
+        }
       }
     }
+    return true;
   }
 
   private void populateAutoComplete() {
@@ -170,18 +143,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
       return true;
     }
-    if (checkSelfPermission(Manifest.permission.READ_CONTACTS) == PackageManager.PERMISSION_GRANTED) {
+    final String contactPermission = Manifest.permission.READ_CONTACTS;
+    if (checkSelfPermission(contactPermission) == PackageManager.PERMISSION_GRANTED) {
       return true;
     }
-    if (shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS)) {
+    if (shouldShowRequestPermissionRationale(contactPermission)) {
       Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
           .setAction(android.R.string.ok, new View.OnClickListener() {
             @Override @TargetApi(Build.VERSION_CODES.M) public void onClick(View v) {
-              requestPermissions(new String[] { Manifest.permission.READ_CONTACTS }, REQUEST_READ_CONTACTS);
+              ActivityCompat.requestPermissions(LoginActivity.this, new String[] { contactPermission }, REQUEST_READ_CONTACTS);
             }
           });
     } else {
-      requestPermissions(new String[] { Manifest.permission.READ_CONTACTS }, REQUEST_READ_CONTACTS);
+      ActivityCompat.requestPermissions(this, new String[] { contactPermission }, REQUEST_READ_CONTACTS);
     }
     return false;
   }
@@ -198,7 +172,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         }
         break;
       }
-      case MY_PERMISSIONS_REQUEST_READ_CONTACTS: {
+      case PERMISSION_REQUEST_CODE: {
         // If request is cancelled, the result arrays are empty.
         if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
@@ -224,7 +198,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
    * errors are presented and no actual login attempt is made.
    */
   private void attemptLogin() {
-    checkPermissionShit();
+    if(!checkPermissionShit())
+      return;
     if (mAuthTask != null) {
       return;
     }
@@ -385,8 +360,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
   }
 
     @Override protected Response doInBackground(Void... params) {
-      // TODO: attempt authentication against a network service.
-
       try {
 
         String jsonParams = gson.toJson(
@@ -396,8 +369,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
       } catch (IOException e) {
         e.printStackTrace();
       }
-
-      // TODO: register the new account here.
       return null;
     }
 
@@ -454,7 +425,6 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     void handleSuccess(Response response) throws IOException {
       TokenDto responseParse = gson.fromJson(new String(response.body().bytes()), TokenDto.class);
-      //TODO: updated response
       Log.i(TAG, response.toString());
 
       if(responseParse.isStatus()) {
