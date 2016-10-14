@@ -37,7 +37,12 @@ public class LocationUtils {
   }
 
   static public String getLocationModeStr(Context context) {
-    switch (getLocationMode(context)) {
+    int mode = getLocationMode(context);
+    return getLocationMode(mode);
+  }
+
+  public static String getLocationMode(int mode) {
+    switch (mode) {
       case Settings.Secure.LOCATION_MODE_OFF:
         return "off";
       case Settings.Secure.LOCATION_MODE_BATTERY_SAVING: // battery saving with wifi triangulation
@@ -51,7 +56,7 @@ public class LocationUtils {
     }
   }
 
-  private static int getLocationMode(Context context) {
+  public static int getLocationMode(Context context) {
     try {
       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
         return Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.LOCATION_MODE);
@@ -62,11 +67,9 @@ public class LocationUtils {
     return -1;
   }
 
-  static public String getProvider(Context context) {
+  static public List<String> getProvider(Context context) {
     final LocationManager manager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
-    List<String> list = manager.getProviders(true);
-
-    return list != null ? list.toString() : ""; //enabled providers only
+    return manager.getProviders(true);
   }
 
   static public boolean hasGPS(Context context) {

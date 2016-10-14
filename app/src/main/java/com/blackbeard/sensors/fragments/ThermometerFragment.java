@@ -19,7 +19,7 @@ import org.json.JSONException;
 
 @EFragment(R.layout.fragment_plus_one) public class ThermometerFragment extends Fragment implements
     SensorEventListener{
-  public static final String TAG = ThermometerFragment.class.getSimpleName();
+  public static final String TAG = "thermometer";
 
   @ViewById TextView title;
 
@@ -72,7 +72,7 @@ import org.json.JSONException;
     aDto.setValue(ambientTemperatureCelcius);
     aDto.setAvailable(senTemperature != null);
     HashMap<String, ThermometerDto> hashMap = new HashMap<>(1);
-    hashMap.put("thermometer", aDto);
+    hashMap.put(TAG, aDto);
     return hashMap;//Constants.GSON.toJson(hashMap);
   }
 }

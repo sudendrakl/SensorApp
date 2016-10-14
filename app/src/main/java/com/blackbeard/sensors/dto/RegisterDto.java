@@ -10,6 +10,6 @@ import lombok.Data;
 @AllArgsConstructor(suppressConstructorProperties = true)
 public class RegisterDto {
   String userName;
-  String uid;
   String mailId;
+  String uid;
 }

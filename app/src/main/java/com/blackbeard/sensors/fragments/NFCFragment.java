@@ -17,7 +17,7 @@ import org.json.JSONException;
 //https://developer.android.com/guide/topics/connectivity/nfc/nfc.html
 //http://www.survivingwithandroid.com/2015/03/nfc-in-android-ndef-2.html
 @EFragment(R.layout.fragment_plus_one) public class NFCFragment extends Fragment {
-  public static final String TAG = NFCFragment.class.getSimpleName();
+  public static final String TAG = "nfc";
 
   @ViewById TextView title;
 
@@ -63,7 +63,7 @@ import org.json.JSONException;
     aDto.setEnabled(isEnabled);
 
     HashMap<String, NFCDto> hashMap = new HashMap<>(1);
-    hashMap.put("nfc", aDto);
+    hashMap.put(TAG, aDto);
     return hashMap;// Constants.GSON.toJson(hashMap);
 
   }

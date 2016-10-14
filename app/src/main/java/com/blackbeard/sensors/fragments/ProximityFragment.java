@@ -19,7 +19,7 @@ import org.json.JSONException;
 
 @EFragment(R.layout.fragment_plus_one) public class ProximityFragment extends Fragment implements
     SensorEventListener{
-  public static final String TAG = ProximityFragment.class.getSimpleName();
+  public static final String TAG = "proximity";
 
   @ViewById TextView title;
 
@@ -72,7 +72,7 @@ import org.json.JSONException;
     aDto.setValue(value);
 
     HashMap<String, ProximityDto> hashMap = new HashMap<>(1);
-    hashMap.put("proximity", aDto);
+    hashMap.put(TAG, aDto);
     return hashMap;// Constants.GSON.toJson(hashMap);
 
   }

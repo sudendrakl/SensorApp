@@ -20,15 +20,39 @@ import android.view.MenuItem;
 import android.view.View;
 import com.bizapps.sensors.R;
 import com.blackbeard.sensors.dto.APIResponseDto;
+import com.blackbeard.sensors.dto.AccelerometerDto;
+import com.blackbeard.sensors.dto.BarometerDto;
+import com.blackbeard.sensors.dto.BatteryDto;
+import com.blackbeard.sensors.dto.BluetoothDto;
 import com.blackbeard.sensors.dto.DeviceInfoDto;
+import com.blackbeard.sensors.dto.GPSDto;
+import com.blackbeard.sensors.dto.GyroDto;
+import com.blackbeard.sensors.dto.NFCDto;
+import com.blackbeard.sensors.dto.ProximityDto;
 import com.blackbeard.sensors.dto.SearchResultDto;
+import com.blackbeard.sensors.dto.StepsDto;
+import com.blackbeard.sensors.dto.ThermometerDto;
+import com.blackbeard.sensors.fragments.AccelerometerFragment;
+import com.blackbeard.sensors.fragments.BarometerFragment;
+import com.blackbeard.sensors.fragments.BatteryFragment;
+import com.blackbeard.sensors.fragments.BluetoothFragment;
+import com.blackbeard.sensors.fragments.GPSFragment;
+import com.blackbeard.sensors.fragments.GyroscopeFragment;
+import com.blackbeard.sensors.fragments.NFCFragment;
+import com.blackbeard.sensors.fragments.ProximityFragment;
+import com.blackbeard.sensors.fragments.StepCounterFragment;
+import com.blackbeard.sensors.fragments.ThermometerFragment;
 import com.blackbeard.sensors.utils.AppUtil;
 import com.blackbeard.sensors.utils.Constants;
 import com.blackbeard.sensors.utils.PreferencesUtil;
 import com.google.gson.JsonSyntaxException;
+import com.google.gson.internal.LinkedTreeMap;
+import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -210,6 +234,8 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
 
     if(responseParse.isStatus()) {
       Snackbar.make(searchView, responseParse.getMessage(), Snackbar.LENGTH_LONG).setAction("OK", null).show();
+      parseHardwareDetails(responseParse.getResponse());
+
       searchAdapter.refresh(responseParse.getResponse());
 
     } else {
@@ -217,4 +243,42 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     }
   }
 
+  private void parseHardwareDetails(ArrayList<DeviceInfoDto> response) {
+    for (DeviceInfoDto deviceInfoDto : response) {
+      List list = new ArrayList<>();
+      for (Object object : deviceInfoDto.getHardwareDetails()) {
+        LinkedTreeMap map = (LinkedTreeMap) object;
+        String key = (String) map.keySet().toArray()[0];
+        final Class clazz = getTypeParse(key);
+        try {
+          list.add(0,Constants.GSON.fromJson(map.get(key).toString(), clazz));
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+      deviceInfoDto.getHardwareDetails().clear();
+      deviceInfoDto.getHardwareDetails().addAll(list);
+    }
+  }
+
+  private Class getTypeParse(String type) {
+    switch (type) {
+      case AccelerometerFragment.TAG:return AccelerometerDto.class;
+      case BarometerFragment.TAG:return BarometerDto.class;
+      case BatteryFragment.TAG:return BatteryDto.class;
+      case BluetoothFragment.TAG:return BluetoothDto.class;
+      case GPSFragment.TAG:return GPSDto.class;
+      case GyroscopeFragment.TAG:return GyroDto.class;
+      case NFCFragment.TAG:return NFCDto.class;
+      case ProximityFragment.TAG:return ProximityDto.class;
+      case StepCounterFragment.TAG:return StepsDto.class;
+      case ThermometerFragment.TAG:return ThermometerDto.class;
+    }
+    return Object.class;
+  }
+
+  @Override protected void onStop() {
+    hideProgressDialog();
+    super.onStop();
+  }
 }

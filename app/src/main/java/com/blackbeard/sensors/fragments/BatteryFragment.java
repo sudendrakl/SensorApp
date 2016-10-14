@@ -17,7 +17,7 @@ import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
 
 @EFragment(R.layout.fragment_plus_one) public class BatteryFragment extends Fragment {
-  public static final String TAG = BatteryFragment.class.getSimpleName();
+  public static final String TAG = "battery";
 
   @ViewById TextView title;
 
@@ -73,7 +73,7 @@ import org.json.JSONException;
     bDto.setIsCharging(isCharging);
     bDto.setLevel(level);
     HashMap<String, BatteryDto> hashMap = new HashMap<>(1);
-    hashMap.put("battery", bDto);
+    hashMap.put(TAG, bDto);
     return  hashMap;//Constants.GSON.toJson(hashMap);
   }
 }

@@ -1,6 +1,7 @@
 package com.blackbeard.sensors.dto;
 
 import android.location.Location;
+import java.util.List;
 import lombok.Data;
 
 /**
@@ -10,7 +11,9 @@ import lombok.Data;
 public class GPSDto {
   boolean isEnabled;
   boolean isAvailable;
-  String provider;
-  String accuracyMode;
-  Location location;
+  List<String> provider;
+  int accuracyMode;
+  double latitude;
+  double longitude;
+  double accuracy;
 }

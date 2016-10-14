@@ -10,6 +10,6 @@ import lombok.Data;
 @Data
 public class BluetoothDto {
   ArrayList<String> devicesList = new ArrayList<>(5);
-  String status;
+  String status = "off";
   String bluetoothOnStatus;
 }

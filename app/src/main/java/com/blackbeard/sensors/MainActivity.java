@@ -253,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
     // Here, thisActivity is the current activity
     String permissionArray[] = new String[] {
         Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.BLUETOOTH, Manifest.permission.BATTERY_STATS, Manifest.permission.NFC,
+        Manifest.permission.BLUETOOTH, Manifest.permission.NFC,
     };
     for(String permission:permissionArray) {
       if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
@@ -265,8 +265,8 @@ public class MainActivity extends AppCompatActivity {
                 }
               });
         } else {
-          ActivityCompat.requestPermissions(this, new String[] { permission },
-              MY_PERMISSIONS_REQUEST);
+          ActivityCompat.requestPermissions(this, permissionArray, MY_PERMISSIONS_REQUEST);
+          break;
         }
       }
     }

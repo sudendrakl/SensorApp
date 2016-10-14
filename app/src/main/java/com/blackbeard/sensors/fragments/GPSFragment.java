@@ -15,6 +15,7 @@ import com.blackbeard.sensors.utils.Constants;
 import com.blackbeard.sensors.utils.LocationUtils;
 import com.google.android.gms.location.LocationResult;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -27,7 +28,7 @@ import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
 
 @EFragment(R.layout.fragment_plus_one) public class GPSFragment extends Fragment {
-  public static final String TAG = GPSFragment.class.getSimpleName();
+  public static final String TAG = "gps";
 
   @ViewById TextView title;
 
@@ -38,7 +39,7 @@ import org.json.JSONException;
 
   boolean isEnabled;
   boolean isAvailable;
-  String provider;
+  List<String> provider;
   String accuracyMode;
   Location location;
   Timer timer;
@@ -70,7 +71,9 @@ import org.json.JSONException;
     provider = LocationUtils.getProvider(context);
     isEnabled = LocationUtils.isGPSEnabled(context);
     accuracyMode = LocationUtils.getLocationModeStr(context);
-    updateText("Available:" + isAvailable + " Provider:" + provider + " Enabled:" + isEnabled + " Accuracy:" + accuracyMode);
+    updateText(
+        String.format("Available:%s Provider:%s Enabled:%s Accuracy:%s", isAvailable, provider,
+            isEnabled, accuracyMode));
   }
 
   @Receiver(actions = Constants.ACTION_BROADCAST_LOCATION, registerAt = Receiver.RegisterAt.OnResumeOnPause)
@@ -119,13 +122,16 @@ import org.json.JSONException;
   public HashMap<String, GPSDto> getData() throws JSONException {
     GPSDto aDto = new GPSDto();
     aDto.setEnabled(isEnabled);
-    aDto.setAccuracyMode(accuracyMode);
+    aDto.setAccuracyMode(LocationUtils.getLocationMode(context));
     aDto.setAvailable(isAvailable);
     aDto.setProvider(provider);
-    aDto.setLocation(location);
-
+    if (location != null) {
+      aDto.setLatitude(location.getLatitude());
+      aDto.setLongitude(location.getLongitude());
+      aDto.setAccuracy(location.getAccuracy());
+    }
     HashMap<String, GPSDto> hashMap = new HashMap<>(1);
-    hashMap.put("gps", aDto);
+    hashMap.put(TAG, aDto);
     return hashMap;// Constants.GSON.toJson(hashMap);
   }
 }

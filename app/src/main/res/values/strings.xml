@@ -17,13 +17,16 @@
   <string name="title_activity_main">MainActivity</string>
   <string name="hint_search">Search</string>
   <string name="device_info">
-    \ Device: %1$s\n
+    \sDevice: %1$s\n
     Manufacturer: %2$s\n
     Model: %3$s\n
     System Version: %4$s\n
     System Version Name: %5$s\n
     User Name: %6$s\n
     Mail ID: %7$s
+  </string>
+  <string name="device_info_minimal">
+    User Name: %1$s\nMail ID: %2$s
   </string>
   <string name="zero_search_result">Sorry!!! didn\'t find any device. Try some other keyword</string>
 </resources>

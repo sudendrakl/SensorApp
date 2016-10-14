@@ -5,6 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.nfc.Tag;
 import android.os.Build;
 import android.support.v4.app.Fragment;
 import android.view.View;
@@ -24,7 +25,7 @@ import org.json.JSONException;
 //http://www.survivingwithandroid.com/2015/03/nfc-in-android-ndef-2.html
 @EFragment(R.layout.fragment_plus_one) public class StepCounterFragment extends Fragment implements SensorEventListener {
 
-  public static final String TAG = StepCounterFragment.class.getSimpleName();
+  public static final String TAG = "step_counter";
 
   @ViewById TextView title;
 
@@ -120,7 +121,7 @@ import org.json.JSONException;
     aDto.setSteps(mSteps);
 
     HashMap<String, StepsDto> hashMap = new HashMap<>(1);
-    hashMap.put("step_counter", aDto);
+    hashMap.put(TAG, aDto);
     return hashMap;// Constants.GSON.toJson(hashMap);
 
   }

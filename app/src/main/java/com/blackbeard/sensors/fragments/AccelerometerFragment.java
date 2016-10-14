@@ -23,7 +23,7 @@ import org.json.JSONException;
 
 @EFragment(R.layout.fragment_plus_one) public class AccelerometerFragment extends Fragment implements
     SensorEventListener{
-  public static final String TAG = AccelerometerFragment.class.getSimpleName();
+  public static final String TAG = "accelerometer";
 
   @ViewById TextView title;
 
@@ -90,7 +90,7 @@ import org.json.JSONException;
     aDto.setAvailable(senAccelerometer!=null);
     aDto.setEnabled(isEnabled);
     HashMap<String, AccelerometerDto> hashMap = new HashMap<>(1);
-    hashMap.put("accelerometer",aDto);
+    hashMap.put(TAG,aDto);
     return  hashMap;
   }
 }

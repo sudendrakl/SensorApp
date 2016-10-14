@@ -109,22 +109,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
   private boolean checkPermissionShit() {
     // Here, thisActivity is the current activity
     String permissionArray[] = new String[] {
-        Manifest.permission.READ_PHONE_STATE, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
-        Manifest.permission.BLUETOOTH, Manifest.permission.BATTERY_STATS, Manifest.permission.NFC,
+        Manifest.permission.READ_PHONE_STATE, Manifest.permission.READ_CONTACTS, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.BLUETOOTH, Manifest.permission.NFC,
     };
-    for(final String permission:permissionArray) {
+    for (final String permission : permissionArray) {
       if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
         if (ActivityCompat.shouldShowRequestPermissionRationale(this, permission)) {
-          Snackbar.make(mNameView, "Please grant permission in settings", Snackbar.LENGTH_INDEFINITE)
-              .setAction("OK", new View.OnClickListener() {
-                @Override public void onClick(View v) {
-                  Log.i(TAG, "Grant permission in settings");
-                  ActivityCompat.requestPermissions(LoginActivity.this, new String[] { permission }, PERMISSION_REQUEST_CODE);
-                }
-              }).show();
+          Snackbar.make(mNameView, "Please grant permission in settings", Snackbar.LENGTH_INDEFINITE).setAction("OK", new View.OnClickListener() {
+            @Override public void onClick(View v) {
+              Log.i(TAG, "Grant permission in settings");
+              ActivityCompat.requestPermissions(LoginActivity.this, new String[] { permission },
+                  PERMISSION_REQUEST_CODE);
+            }
+          }).show();
           return false;
         } else {
-          ActivityCompat.requestPermissions(this, new String[] { permission }, PERMISSION_REQUEST_CODE);
+          ActivityCompat.requestPermissions(this, permissionArray, PERMISSION_REQUEST_CODE);
+          break;
         }
       }
     }

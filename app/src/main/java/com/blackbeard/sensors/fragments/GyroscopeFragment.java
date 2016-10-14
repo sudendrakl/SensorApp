@@ -24,7 +24,7 @@ import org.json.JSONException;
 
 @EFragment(R.layout.fragment_plus_one) public class GyroscopeFragment extends Fragment implements
     SensorEventListener{
-  public static final String TAG = GyroscopeFragment.class.getSimpleName();
+  public static final String TAG = "gyroscope";
 
   @ViewById TextView title;
 
@@ -98,7 +98,7 @@ import org.json.JSONException;
     aDto.setV3(v3);
 
     HashMap<String, GyroDto> hashMap = new HashMap<>(1);
-    hashMap.put("gyroscope", aDto);
+    hashMap.put(TAG, aDto);
     return hashMap;// Constants.GSON.toJson(hashMap);
   }
 }

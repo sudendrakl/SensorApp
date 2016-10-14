@@ -21,7 +21,7 @@ import org.androidannotations.annotations.ViewById;
 import org.json.JSONException;
 
 @EFragment(R.layout.fragment_plus_one) public class BluetoothFragment extends Fragment {
-  public static final String TAG = BluetoothFragment.class.getSimpleName();
+  public static final String TAG = "bluetooth";
 
   @ViewById TextView title;
 
@@ -33,7 +33,7 @@ import org.json.JSONException;
 
   private BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
   private ArrayList<String> devicesList = new ArrayList<>(5);
-  String status;
+  String status="off";
   String bluetoothOnStatus;
 
   @AfterViews  void init() {
@@ -142,7 +142,7 @@ import org.json.JSONException;
     bDto.setStatus(status);
     bDto.setDevicesList(devicesList);
     HashMap<String, BluetoothDto> hashMap = new HashMap<>(1);
-    hashMap.put("bluetooth", bDto);
+    hashMap.put(TAG, bDto);
     return  hashMap;//Constants.GSON.toJson(hashMap);
   }
 }

@@ -24,7 +24,7 @@ import org.json.JSONException;
 
 @EFragment(R.layout.fragment_plus_one) public class BarometerFragment extends Fragment implements
     SensorEventListener{
-  public static final String TAG = BarometerFragment.class.getSimpleName();
+  public static final String TAG = "barometer";
 
   @ViewById TextView title;
 
@@ -96,7 +96,7 @@ import org.json.JSONException;
     bDto.setEnabled(isEnabled);
     bDto.setPressure(pressure);
     HashMap<String, BarometerDto> hashMap = new HashMap<>(1);
-    hashMap.put("barometer",bDto);
+    hashMap.put(TAG,bDto);
     return  hashMap;//Constants.GSON.toJson(hashMap);
   }
 }
