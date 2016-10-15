@@ -22,13 +22,9 @@ import com.blackbeard.sensors.dto.NFCDto;
 import com.blackbeard.sensors.dto.ProximityDto;
 import com.blackbeard.sensors.dto.StepsDto;
 import com.blackbeard.sensors.dto.ThermometerDto;
-import com.blackbeard.sensors.fragments.GPSFragment;
-import com.blackbeard.sensors.fragments.StepCounterFragment;
 import com.blackbeard.sensors.utils.LocationUtils;
 import com.ms.square.android.expandabletextview.ExpandableTextView;
 import java.util.ArrayList;
-import java.util.Locale;
-import java.util.Objects;
 
 /**
  * Created by sudendra.kamble on 12/10/16.
@@ -48,19 +44,19 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH
 
   @SuppressLint("DefaultLocale") @Override public void onBindViewHolder(RecyclerVH holder, int position) {
 
-    DeviceInfoDto deviceInfoDto = list.get(position);
+    DeviceInfoDto deviceDto = list.get(position);
     Context context = holder.userInfo.getContext();
-    if(deviceInfoDto!=null) {
+    if(deviceDto!=null) {
       //holder.userInfo.setText(holder.userInfo.getContext()
       //    .getString(R.string.device_info, deviceInfoDto.getDevice(), deviceInfoDto.getManufacturer(),
       //        deviceInfoDto.getModel(), deviceInfoDto.getSystemVersion(), deviceInfoDto.getSystemVersionName(),
       //        deviceInfoDto.getUserName(), deviceInfoDto.getMailId()));
-      holder.userInfo.setText(context.getString(R.string.device_info_minimal, deviceInfoDto.getUserName(), deviceInfoDto.getMailId()));
+      holder.userInfo.setText(context.getString(R.string.device_info_minimal, deviceDto.getUserName(), deviceDto.getMailId()));
       ExpandableTextView sensorInfo = holder.sensorInfo;
       SpannableStringBuilder builder=new SpannableStringBuilder();
 
       SpannableStringBuilder sensorTextBuilder = new SpannableStringBuilder("");
-      for(Object object : deviceInfoDto.getHardwareDetails()) {
+      for(Object object : deviceDto.getHardwareDetails()) {
         if (object instanceof AccelerometerDto) {
           sensorTextBuilder.append(getTitleBuilder(builder,"Accelerometer"));
           sensorTextBuilder.append(String.format( "X:%.2f  Y:%.2f Z:%.2f", ((AccelerometerDto) object).getX(), ((AccelerometerDto) object).getY(), ((AccelerometerDto) object).getZ()));
