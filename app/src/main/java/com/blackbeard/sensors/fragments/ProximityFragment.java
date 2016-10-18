@@ -30,7 +30,7 @@ import org.json.JSONException;
   Sensor senProximity;
   float value;
 
-  @AfterViews  void init() {
+  @AfterViews  void initViews() {
     title.setText("Proximity");
     updateText(0);
   }

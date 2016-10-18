@@ -36,7 +36,7 @@ import org.json.JSONException;
   String status="off";
   String bluetoothOnStatus;
 
-  @AfterViews  void init() {
+  @AfterViews  void initViews() {
     title.setText("Bluetooth");
     adapter.startDiscovery();
     updateText("Status:" + (adapter.isEnabled()?"on":"off"));

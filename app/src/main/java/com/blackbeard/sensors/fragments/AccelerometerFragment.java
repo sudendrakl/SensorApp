@@ -37,7 +37,7 @@ import org.json.JSONException;
   Timer timer;
   TimerTask timerTask;
 
-  @AfterViews  void init() {
+  @AfterViews  void initViews() {
     title.setText("Accelerometer");
     timer.scheduleAtFixedRate(timerTask, 0, Constants.UPDATE_UI_DELAY);
   }

@@ -12,6 +12,10 @@ import okhttp3.MediaType;
 
 public interface Constants {
 
+  long SYNC_INITIAL_DELAY = 10000L; // 10 sec
+  long SYNC_PERIOD = 30000L;// 30 sec
+  long UPDATE_UI_DELAY = 1000L;
+
   interface URLS {
 
     String REGISTER = BuildConfig.BASE_URL + "api/register/";
@@ -31,5 +35,4 @@ public interface Constants {
   .setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
   .create();
 
-  long UPDATE_UI_DELAY = 1000;
 }

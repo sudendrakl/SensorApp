@@ -7,8 +7,11 @@ import android.support.v4.app.Fragment;
 import android.widget.TextView;
 import com.bizapps.sensors.R;
 import com.blackbeard.sensors.dto.BatteryDto;
+import com.blackbeard.sensors.utils.Constants;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 import org.androidannotations.annotations.AfterViews;
 import org.androidannotations.annotations.EFragment;
 import org.androidannotations.annotations.Receiver;
@@ -25,10 +28,19 @@ import org.json.JSONException;
 
   String isCharging, chargingType;
   float level;
+  Timer timer;
+  TimerTask timerTask;
 
-  @AfterViews  void init() {
+  @AfterViews  void initViews() {
     title.setText("Battery");
     initSensor();
+    timer = new Timer();
+    timerTask = new TimerTask() {
+      @Override public void run() {
+        initSensor();
+      }
+    };
+    timer.scheduleAtFixedRate(timerTask, 0, Constants.UPDATE_UI_DELAY);
   }
 
   private void initSensor() {

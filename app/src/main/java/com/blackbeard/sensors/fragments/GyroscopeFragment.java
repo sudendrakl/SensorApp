@@ -54,7 +54,7 @@ import org.json.JSONException;
     };
   }
 
-  @AfterViews  void init() {
+  @AfterViews  void initViews() {
     title.setText("Gyroscope");
     content.setText(String.format("Available:%s", available ? "yes" : "no"));
     timer.scheduleAtFixedRate(timerTask, 0, Constants.UPDATE_UI_DELAY);

@@ -30,7 +30,7 @@ import org.json.JSONException;
   Sensor senTemperature;
   float ambientTemperatureCelcius;
 
-  @AfterViews  void init() {
+  @AfterViews  void initViews() {
     title.setText("Thermometer");
     updateText(senTemperature != null, "no");
 
