@@ -44,10 +44,12 @@ import org.json.JSONException;
   }
 
   private void initSensor() {
-    IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-    Intent intent = getActivity().registerReceiver(null, ifilter);
-    assert intent != null;
-    extractAndUpdate(intent);
+    if (getActivity() != null && isAdded()) {
+      IntentFilter ifilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+      Intent intent = getActivity().registerReceiver(null, ifilter);
+      assert intent != null;
+      extractAndUpdate(intent);
+    }
   }
 
   private void extractAndUpdate(Intent batteryStatus) {

@@ -38,9 +38,9 @@ public class BackgroundLocationService extends Service
     LocationListener {
 
   private static final String TAG = BackgroundLocationService.class.getSimpleName();
-  private static final long UPDATE_INTERVAL = 1000;//millis
+  private static final long UPDATE_INTERVAL = 2000;//millis
   private static final long FASTEST_INTERVAL = UPDATE_INTERVAL / 2;//millis
-  private static final float MINIMUM_DISPLACEMENT = 5;//meters
+  private static final float MINIMUM_DISPLACEMENT = 1;//meters
   IBinder mBinder = new LocalBinder();
 
   private GoogleApiClient mGoogleApiClient;

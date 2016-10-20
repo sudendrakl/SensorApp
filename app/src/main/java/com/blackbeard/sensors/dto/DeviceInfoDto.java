@@ -21,7 +21,8 @@ public class DeviceInfoDto {
   String appVersion;//: 1.1.3,
   List hardwareDetails;//: [ {gps:{lat:16.7457, lon:77.5643}} ]
   String userName;
-  String mailId;
+  String phone;
+  String uid;
 
   public DeviceInfoDto(List hardwareDetail) {
     try {

@@ -17,7 +17,7 @@ public interface Constants {
   long UPDATE_UI_DELAY = 1000L;
 
   interface URLS {
-
+    String LOGIN = BuildConfig.BASE_URL + "api/login/";
     String REGISTER = BuildConfig.BASE_URL + "api/register/";
     String ADD_ENTRY = BuildConfig.BASE_URL + "api/add_entry/";
     String SEARCH = BuildConfig.BASE_URL + "api/search/";

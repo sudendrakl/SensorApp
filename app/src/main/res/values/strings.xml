@@ -2,18 +2,17 @@
   <string name="app_name">SensorApp</string>
 
   <!-- Strings related to login -->
-  <string name="prompt_email">Email</string>
-  <string name="prompt_password">Password (optional)</string>
-  <string name="action_sign_in">Sign in or register</string>
+  <string name="prompt_phone">10 digit mobile number</string>
+  <string name="prompt_password">Password</string>
+  <string name="action_sign_in">Sign in</string>
   <string name="action_sign_in_short">Sign in</string>
-  <string name="error_invalid_email">This email address is invalid</string>
+  <string name="error_invalid_phone">*This phone number is invalid</string>
   <string name="error_invalid_name">This name is too short</string>
+  <string name="error_invalid_password">Password should be 4–12 letters</string>
   <string name="error_incorrect_name">This name is incorrect</string>
   <string name="error_field_required">This field is required</string>
-  <string name="permission_rationale">"Contacts permissions are needed for providing email
-    completions."
-  </string>
-  <string name="prompt_your_name">Your Name</string>
+  <string name="permission_rationale">"Contacts permissions are needed for providing phone completions."</string>
+  <string name="prompt_your_name">First &amp; Last Name</string>
   <string name="title_activity_main">MainActivity</string>
   <string name="hint_search">Search</string>
   <string name="device_info">
@@ -26,7 +25,8 @@
     Mail ID: %7$s
   </string>
   <string name="device_info_minimal">
-    User Name: %1$s\nMail ID: %2$s
+    User Name: %1$s\nPhone: %2$s
   </string>
   <string name="zero_search_result">Sorry!!! didn\'t find any device. Try some other keyword</string>
+  <string name="action_register"><u>Register</u></string>
 </resources>

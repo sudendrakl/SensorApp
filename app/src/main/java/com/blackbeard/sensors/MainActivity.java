@@ -44,6 +44,7 @@ import com.blackbeard.sensors.fragments.StepCounterFragment;
 import com.blackbeard.sensors.fragments.StepCounterFragment_;
 import com.blackbeard.sensors.fragments.ThermometerFragment;
 import com.blackbeard.sensors.fragments.ThermometerFragment_;
+import com.blackbeard.sensors.utils.AppUtil;
 import com.blackbeard.sensors.utils.Constants;
 import com.blackbeard.sensors.utils.PreferencesUtil;
 import java.io.IOException;
@@ -85,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         uploadAllData();
       }
     };
+    autoSyncTimer.scheduleAtFixedRate(autoSyncTimerTask, Constants.SYNC_INITIAL_DELAY, Constants.SYNC_PERIOD);
   }
 
   private void refresh() {
@@ -146,10 +148,9 @@ public class MainActivity extends AppCompatActivity {
       jsonArray.add(((AccelerometerFragment) fragmentManager.findFragmentByTag(AccelerometerFragment.TAG)).getData());
 
       final DeviceInfoDto deviceInfoDto = new DeviceInfoDto(jsonArray);
-
+      deviceInfoDto.setUid(AppUtil.getImeiOrUniqueID(getApplicationContext()));
       sendRequest(Constants.URLS.ADD_ENTRY, Constants.GSON.toJson(deviceInfoDto));
 
-      //TODO: do something with this shit addAppResponse
     } catch (IOException | JSONException e) {
       //Failed to update? just ignore
       e.printStackTrace();
@@ -177,32 +178,34 @@ public class MainActivity extends AppCompatActivity {
   }
 
   void handleFailure(Response response, String responseString) throws IOException {
+    int responseCode = response.code();
+    Log.d(TAG, String.format("handleFailure(%d): %s", responseCode, responseString));
     APIResponseDto responseParse = Constants.GSON.fromJson(responseString, APIResponseDto.class);
-    if (response.code() == 400 || response.code() == 500) {
-      Snackbar.make(toolbar, responseParse.getMessage(), Snackbar.LENGTH_INDEFINITE)
-          .setAction("OK", null)
-          .show();
-    } else if (response.code() == 401) {
-      Snackbar.make(toolbar, "Unauthorised", Snackbar.LENGTH_INDEFINITE)
-          .setAction("OK", null)
-          .show();
+    if (responseCode == 400 || responseCode == 500) {
+      //Snackbar.make(toolbar, responseParse.getMessage(), Snackbar.LENGTH_INDEFINITE)
+      //    .setAction("OK", null)
+      //    .show();
+    } else if (responseCode == 401 || responseCode == 403) { //unauthorised //clear token, redirect to login from here
+      PreferencesUtil.saveToken(this, null);
+      finish();
+      startActivity(new Intent(this, LoginActivity.class));
+      //Snackbar.make(toolbar, "Unauthorised", Snackbar.LENGTH_INDEFINITE)
+      //    .setAction("OK", null)
+      //    .show();
     } else {
-      Snackbar.make(toolbar, "Unknown server error", Snackbar.LENGTH_INDEFINITE)
-          .setAction("OK", null)
-          .show();
+      //Snackbar.make(toolbar, "Unknown server error", Snackbar.LENGTH_INDEFINITE)
+      //    .setAction("OK", null)
+      //    .show();
     }
   }
 
   void handleSuccess(Response response, String responseString) throws IOException {
+    Log.d(TAG, String.format("handleSuccess(%d): %s", response.code(), responseString));
     APIResponseDto responseParse = Constants.GSON.fromJson(responseString, APIResponseDto.class);
-    //TODO: updated response
-    Log.i(TAG, response.toString());
-
     if (responseParse.isStatus()) {
-      //TODO: what to do
-      Snackbar.make(toolbar, responseParse.getMessage(), Snackbar.LENGTH_LONG)
-          .setAction("OK", null)
-          .show();
+      //Snackbar.make(toolbar, responseParse.getMessage(), Snackbar.LENGTH_LONG)
+      //    .setAction("OK", null)
+      //    .show();
     } else {
       handleFailure(response, responseString);
     }
@@ -233,7 +236,6 @@ public class MainActivity extends AppCompatActivity {
     IntentFilter intentFilter = new IntentFilter("check_permission");
     registerReceiver(receiver, intentFilter);
     checkPermissionShit();
-    autoSyncTimer.scheduleAtFixedRate(autoSyncTimerTask, Constants.SYNC_INITIAL_DELAY, Constants.SYNC_PERIOD);
   }
 
   private void checkPermissionShit() {

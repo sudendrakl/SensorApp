@@ -50,8 +50,8 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH
       //holder.userInfo.setText(holder.userInfo.getContext()
       //    .getString(R.string.device_info, deviceInfoDto.getDevice(), deviceInfoDto.getManufacturer(),
       //        deviceInfoDto.getModel(), deviceInfoDto.getSystemVersion(), deviceInfoDto.getSystemVersionName(),
-      //        deviceInfoDto.getUserName(), deviceInfoDto.getMailId()));
-      holder.userInfo.setText(context.getString(R.string.device_info_minimal, deviceDto.getUserName(), deviceDto.getMailId()));
+      //        deviceInfoDto.getUserName(), deviceInfoDto.getPhone()));
+      holder.userInfo.setText(context.getString(R.string.device_info_minimal, deviceDto.getUserName(), deviceDto.getPhone()));
       ExpandableTextView sensorInfo = holder.sensorInfo;
       SpannableStringBuilder builder=new SpannableStringBuilder();
 

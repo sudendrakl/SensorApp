@@ -12,7 +12,7 @@
       android:elevation="50dp"
       card_view:cardBackgroundColor="@color/cardview_initial_background"
       card_view:cardCornerRadius="2dp"
-      android:layout_margin="@dimen/margin_small"
+      android:layout_margin="@dimen/margin_tiny"
       >
     <LinearLayout
         android:layout_width="match_parent"

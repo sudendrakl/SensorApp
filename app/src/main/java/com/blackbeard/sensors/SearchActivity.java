@@ -3,6 +3,7 @@ package com.blackbeard.sensors;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
@@ -202,7 +203,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
   }
 
 
-  void handleFailure(Response response, String responseBody) throws IOException, JsonSyntaxException {
+  void handleFailure(final Response response, final String responseBody) throws IOException, JsonSyntaxException {
     if(response==null || responseBody == null) {
       Snackbar.make(searchView, "Failed to search, please check n/w", Snackbar.LENGTH_INDEFINITE)
           .setAction("OK", null)
@@ -210,22 +211,28 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
       searchAdapter.refresh(null);
       return;
     }
-
-      APIResponseDto responseParse =
-        Constants.GSON.fromJson(responseBody, APIResponseDto.class);
-    if (response.code() == 400 || response.code() == 500) {
-      Snackbar.make(searchView, responseParse.getMessage(), Snackbar.LENGTH_INDEFINITE)
-          .setAction("OK", null)
-          .show();
-    } else if (response.code() == 401) {
-      Snackbar.make(searchView, "Unauthorised", Snackbar.LENGTH_INDEFINITE)
-          .setAction("OK", null)
-          .show();
-    } else {
-      Snackbar.make(searchView, "Unknown server error", Snackbar.LENGTH_INDEFINITE)
-          .setAction("OK", null)
-          .show();
-    }
+    runOnUiThread(new Runnable() {
+      @Override public void run() {
+        int responseCode = response.code();
+        Log.d(TAG, String.format("handleFailure(%d): %s", responseCode, responseBody));
+        APIResponseDto responseParse = Constants.GSON.fromJson(responseBody, APIResponseDto.class);
+        if (responseCode == 400 || responseCode == 500) {
+          Snackbar.make(toolbar, responseParse.getMessage(), Snackbar.LENGTH_SHORT)
+              .setAction("OK", null)
+              .show();
+        } else if (responseCode == 401 || responseCode == 403) { //unauthorised //clear token, redirect to login from here
+          Snackbar.make(toolbar, "Unauthorised access", Snackbar.LENGTH_SHORT)
+              .show();
+          PreferencesUtil.saveToken(SearchActivity.this, null);
+          finish();
+          startActivity(new Intent(SearchActivity.this, LoginActivity.class));
+        } else {
+          //Snackbar.make(toolbar, "Unknown server error", Snackbar.LENGTH_INDEFINITE)
+          //    .setAction("OK", null)
+          //    .show();
+        }
+      }
+    });
   }
 
   void handleSuccess(Response response, String responseBody) throws IOException {
@@ -233,7 +240,8 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
     Log.i(TAG, response.toString());
 
     if(responseParse.isStatus()) {
-      Snackbar.make(searchView, responseParse.getMessage(), Snackbar.LENGTH_LONG).setAction("OK", null).show();
+      Log.d(TAG, String.format("handleSuccess: %s", responseParse.getMessage()));
+      //Snackbar.make(searchView, responseParse.getMessage(), Snackbar.LENGTH_LONG).setAction("OK", null).show();
       parseHardwareDetails(responseParse.getResponse());
 
       searchAdapter.refresh(responseParse.getResponse());

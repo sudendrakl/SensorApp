@@ -61,9 +61,7 @@ import org.json.JSONException;
   @AfterViews  void initViews() {
     title.setText("GPS");
     updateStatus();
-    if (isAvailable & isEnabled) {
       timer.scheduleAtFixedRate(timerTask, 0, Constants.UPDATE_UI_DELAY);
-    }
   }
 
   private void updateStatus() {

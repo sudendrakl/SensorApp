@@ -9,7 +9,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor(suppressConstructorProperties = true)
 public class RegisterDto {
-  String userName;
-  String mailId;
   String uid;
+  String phone;
+  String userName;
+  String password;
 }

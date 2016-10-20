@@ -20,6 +20,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatTextView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -60,16 +61,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
   private UserLoginTask mAuthTask = null;
 
   // UI references.
-  private AutoCompleteTextView mEmailView;
+  private AutoCompleteTextView mPhoneView;
   private AutoCompleteTextView mNameView;
+  private AppCompatTextView mRegisterView;
+  private AutoCompleteTextView mPasswordView;
+
   private View mProgressView;
   private View mLoginFormView;
+  private Button mEmailSignInButton;
+  private boolean isLogin = true;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_login);
     // Set up the login form.
-    mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
+    mPhoneView = (AutoCompleteTextView) findViewById(R.id.phone);
     populateAutoComplete();
 
     mNameView = (AutoCompleteTextView) findViewById(R.id.name);
@@ -83,7 +89,9 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
       }
     });
 
-    Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+    mPasswordView = (AutoCompleteTextView) findViewById(R.id.password);
+
+    mEmailSignInButton = (Button) findViewById(R.id.sign_in_button);
     mEmailSignInButton.setOnClickListener(new OnClickListener() {
       @Override public void onClick(View view) {
         attemptLogin();
@@ -92,6 +100,25 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     mLoginFormView = findViewById(R.id.login_form);
     mProgressView = findViewById(R.id.login_progress);
+    mRegisterView = (AppCompatTextView) findViewById(R.id.register);
+    mRegisterView.setOnClickListener(new OnClickListener() {
+      @Override public void onClick(View v) {
+        toggleRegister();
+      }
+    });
+  }
+
+  private void toggleRegister() {
+    isLogin = !isLogin;
+    if(isLogin) {
+      mNameView.setVisibility(View.GONE);
+      mEmailSignInButton.setText(R.string.action_sign_in);
+      mRegisterView.setText(R.string.action_register);
+    } else {
+      mNameView.setVisibility(View.VISIBLE);
+      mEmailSignInButton.setText(R.string.action_register);
+      mRegisterView.setText(R.string.action_sign_in);
+    }
   }
 
   @Override protected void onStart() {
@@ -149,7 +176,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
       return true;
     }
     if (shouldShowRequestPermissionRationale(contactPermission)) {
-      Snackbar.make(mEmailView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
+      Snackbar.make(mPhoneView, R.string.permission_rationale, Snackbar.LENGTH_INDEFINITE)
           .setAction(android.R.string.ok, new View.OnClickListener() {
             @Override @TargetApi(Build.VERSION_CODES.M) public void onClick(View v) {
               ActivityCompat.requestPermissions(LoginActivity.this, new String[] { contactPermission }, REQUEST_READ_CONTACTS);
@@ -206,31 +233,38 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     // Reset errors.
-    mEmailView.setError(null);
+    mPhoneView.setError(null);
     mNameView.setError(null);
 
     // Store values at the time of the login attempt.
-    String email = mEmailView.getText().toString();
-    String name = mNameView.getText().toString();
+    String phone = mPhoneView.getText().toString();
+    String name = mNameView.getText().toString().trim();
+    String password = mPasswordView.getText().toString();
 
     boolean cancel = false;
     View focusView = null;
 
     // Check for a valid name, if the user entered one.
-    if (!TextUtils.isEmpty(name) && !isNameValid(name)) {
+    if (!isLogin && (TextUtils.isEmpty(name) || !isNameValid(name))) {
       mNameView.setError(getString(R.string.error_invalid_name));
       focusView = mNameView;
       cancel = true;
     }
 
-    // Check for a valid email address.
-    if (TextUtils.isEmpty(email)) {
-      mEmailView.setError(getString(R.string.error_field_required));
-      focusView = mEmailView;
+    if (TextUtils.isEmpty(password) || !isPasswordValid(password)) {
+      mPasswordView.setError(getString(R.string.error_invalid_password));
+      focusView = mPasswordView;
       cancel = true;
-    } else if (!isEmailValid(email)) {
-      mEmailView.setError(getString(R.string.error_invalid_email));
-      focusView = mEmailView;
+    }
+
+    // Check for a valid phone address.
+    if (TextUtils.isEmpty(phone)) {
+      mPhoneView.setError(getString(R.string.error_field_required));
+      focusView = mPhoneView;
+      cancel = true;
+    } else if (!isPhoneValid(phone)) {
+      mPhoneView.setError(getString(R.string.error_invalid_phone));
+      focusView = mPhoneView;
       cancel = true;
     }
 
@@ -242,13 +276,21 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
       // Show a progress spinner, and kick off a background task to
       // perform the user login attempt.
       showProgress(true);
-      mAuthTask = new UserLoginTask(email, name);
+      mAuthTask = new UserLoginTask(phone, name, password);
       mAuthTask.execute((Void) null);
     }
   }
 
   private boolean isEmailValid(String email) {
     return email.contains("@");
+  }
+
+  private boolean isPhoneValid(String phone) {
+    return phone.length()==10;
+  }
+
+  private boolean isPasswordValid(String password) {
+    return password.length()>3 && password.length()<12;
   }
 
   private boolean isNameValid(String name) {
@@ -329,7 +371,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         new ArrayAdapter<>(LoginActivity.this, android.R.layout.simple_dropdown_item_1line,
             emailAddressCollection);
 
-    mEmailView.setAdapter(adapter);
+    mPhoneView.setAdapter(adapter);
   }
 
   private interface ProfileQuery {
@@ -348,25 +390,35 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
    */
   public class UserLoginTask extends AsyncTask<Void, Void, Response> {
 
-    private final String email;
+    private final String phone;
     private final String name;
     private final OkHttpClient client = new OkHttpClient();
 
     private final Gson gson;
-    UserLoginTask(String email, String name) {
-      this.email = email;
+    private final String password;
+
+    UserLoginTask(String phone, String name, String password) {
+      this.phone = phone;
       this.name = name;
       this.gson = Constants.GSON;
+      this.password = password;
 
   }
 
     @Override protected Response doInBackground(Void... params) {
       try {
 
-        String jsonParams = gson.toJson(
-            new RegisterDto(name, email, AppUtil.getImeiOrUniqueID(LoginActivity.this)));
-
-        return sendRequest(Constants.URLS.REGISTER, jsonParams);
+        String jsonParams;
+        String url;
+        String imei = AppUtil.getImeiOrUniqueID(LoginActivity.this);
+        if (!isLogin) {
+          jsonParams = gson.toJson(new RegisterDto(imei, phone, name, password));
+          url = Constants.URLS.REGISTER;
+        } else {
+          jsonParams = gson.toJson(new RegisterDto(imei, phone, null, password));
+          url = Constants.URLS.LOGIN;
+        }
+        return sendRequest(url, jsonParams);
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -407,21 +459,38 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     void handleFailure(Response response) throws IOException {
       TokenDto responseParse = gson.fromJson(new String(response.body().bytes()), TokenDto.class);
-      handleFailure(responseParse);
+      handleFailure(response, responseParse);
     }
 
-    void handleFailure(TokenDto tokenDto) {
-      if (tokenDto.getCode() == 1) {
-        Snackbar.make(mLoginFormView, "Incorrect details", Snackbar.LENGTH_INDEFINITE)
-            .setAction("OK", null)
-            .show();
-      } else {
-        Snackbar.make(mLoginFormView, "Retry again", Snackbar.LENGTH_INDEFINITE)
-            .setAction("OK", null)
-            .show();
-      }
-
-      mNameView.requestFocus();
+    void handleFailure(final Response response, final TokenDto tokenDto) {
+      runOnUiThread(new Runnable() {
+        @Override public void run() {
+          if (!isLogin) { //registration
+            if (tokenDto.getCode() == 1) {
+              Snackbar.make(mLoginFormView, tokenDto.getMessage(), Snackbar.LENGTH_SHORT)
+                  .setAction("OK", null)
+                  .show();
+            } else {
+              Snackbar.make(mLoginFormView, tokenDto.getMessage() + ". Retry again", Snackbar.LENGTH_LONG).setAction("OK", null).show();
+            }
+          } else { //login
+            switch (response.code()) {
+              case 200:
+              case 501:
+                Snackbar.make(mLoginFormView, tokenDto.getMessage(), Snackbar.LENGTH_LONG).show();
+                mPasswordView.requestFocus();
+                break;
+              case 400:
+                Snackbar.make(mLoginFormView, tokenDto.getMessage(), Snackbar.LENGTH_LONG).show();
+                break;
+              case 403:
+                Snackbar.make(mLoginFormView, tokenDto.getMessage(), Snackbar.LENGTH_LONG).show();
+                mPhoneView.requestFocus();
+                break;
+            }
+          }
+        }
+      });
     }
 
     void handleSuccess(Response response) throws IOException {
@@ -433,7 +502,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
         Intent intent = new Intent(LoginActivity.this, MainActivity.class);
         LoginActivity.this.startActivity(intent);
       } else {
-        handleFailure(responseParse);
+        handleFailure(response, responseParse);
       }
     }
   }
