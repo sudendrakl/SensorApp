@@ -2,7 +2,6 @@ package com.blackbeard.sensors.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import com.blackbeard.sensors.LoginActivity;
 
 /**
  * Created by sudendra.kamble on 05/10/16.
