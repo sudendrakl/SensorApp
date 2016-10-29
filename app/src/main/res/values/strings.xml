@@ -29,4 +29,5 @@
   </string>
   <string name="zero_search_result">Sorry!!! didn\'t find any device. Try some other keyword</string>
   <string name="action_register"><u>Register</u></string>
+  <string name="hint_logout">logout</string>
 </resources>

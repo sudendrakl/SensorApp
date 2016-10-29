@@ -52,6 +52,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -227,6 +229,8 @@ public class MainActivity extends AppCompatActivity {
   @Override public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == R.id.action_search) {
       startActivity(new Intent(this, SearchActivity.class));
+    } else if (item.getItemId() == R.id.action_logout) {
+      logout();
     }
     return super.onOptionsItemSelected(item);
   }
@@ -252,13 +256,34 @@ public class MainActivity extends AppCompatActivity {
                 @Override public void onClick(View v) {
                   Log.i(TAG, "Grant permission in settings");
                 }
-              });
+              }).show();
         } else {
           ActivityCompat.requestPermissions(this, permissionArray, MY_PERMISSIONS_REQUEST);
           break;
         }
       }
     }
+  }
+
+  private void logout() {
+    Request request = new Request.Builder().url(Constants.URLS.LOGOUT)
+        .header("Authorization", PreferencesUtil.getToken(this))
+        .build();
+
+    client.newCall(request).enqueue(new Callback() {
+      @Override public void onFailure(Call call, IOException e) {
+        Log.d(TAG, "failed to log off....");
+        e.printStackTrace();
+        Snackbar.make(toolbar, "Failed to logout, please try again", Snackbar.LENGTH_INDEFINITE).show();
+      }
+
+      @Override public void onResponse(Call call, Response response) throws IOException {
+        Log.d(TAG, "logged out....");
+        PreferencesUtil.saveToken(MainActivity.this.getApplicationContext(), null);
+        MainActivity.this.finish();
+        MainActivity.this.startActivity(new Intent(MainActivity.this, LoginActivity.class));
+      }
+    });
   }
 
   @Override protected void onStop() {

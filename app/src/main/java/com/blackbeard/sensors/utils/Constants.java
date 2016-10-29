@@ -21,7 +21,14 @@ public interface Constants {
     String REGISTER = BuildConfig.BASE_URL + "api/register/";
     String ADD_ENTRY = BuildConfig.BASE_URL + "api/add_entry/";
     String SEARCH = BuildConfig.BASE_URL + "api/search/";
+    String LOGOUT = BuildConfig.BASE_URL + "api/logout";
   }
+
+  interface SEARCH_PARAMS {
+    String NAME = "user_name";
+    String PHONE = "phone";
+  }
+
   MediaType MEDIA_TYPE_MARKDOWN = MediaType.parse("text/x-markdown; charset=utf-8");
   MediaType JSON_TYPE_MARKDOWN = MediaType.parse("application/json; charset=utf-8");
 

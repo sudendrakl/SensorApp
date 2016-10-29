@@ -17,6 +17,8 @@ import android.os.Bundle;
 import android.provider.ContactsContract;
 import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
+import android.support.design.widget.TextInputEditText;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -62,9 +64,10 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
   // UI references.
   private AutoCompleteTextView mPhoneView;
-  private AutoCompleteTextView mNameView;
+  private TextInputEditText mNameView;
   private AppCompatTextView mRegisterView;
-  private AutoCompleteTextView mPasswordView;
+  private TextInputEditText mPasswordView;
+  private TextInputLayout mNameTextInputLayout;
 
   private View mProgressView;
   private View mLoginFormView;
@@ -78,7 +81,8 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     mPhoneView = (AutoCompleteTextView) findViewById(R.id.phone);
     populateAutoComplete();
 
-    mNameView = (AutoCompleteTextView) findViewById(R.id.name);
+    mNameTextInputLayout = (TextInputLayout) findViewById(R.id.name_text_input_lay);
+    mNameView = (TextInputEditText) findViewById(R.id.name);
     mNameView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
       @Override public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
         if (id == R.id.name || id == EditorInfo.IME_NULL) {
@@ -89,7 +93,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
       }
     });
 
-    mPasswordView = (AutoCompleteTextView) findViewById(R.id.password);
+    mPasswordView = (TextInputEditText) findViewById(R.id.password);
 
     mEmailSignInButton = (Button) findViewById(R.id.sign_in_button);
     mEmailSignInButton.setOnClickListener(new OnClickListener() {
@@ -111,11 +115,11 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
   private void toggleRegister() {
     isLogin = !isLogin;
     if(isLogin) {
-      mNameView.setVisibility(View.GONE);
+      mNameTextInputLayout.setVisibility(View.GONE);
       mEmailSignInButton.setText(R.string.action_sign_in);
       mRegisterView.setText(R.string.action_register);
     } else {
-      mNameView.setVisibility(View.VISIBLE);
+      mNameTextInputLayout.setVisibility(View.VISIBLE);
       mEmailSignInButton.setText(R.string.action_register);
       mRegisterView.setText(R.string.action_sign_in);
     }
@@ -458,6 +462,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     }
 
     void handleFailure(Response response) throws IOException {
+      Log.d(TAG, "API login/register failed"+ response.toString());
       TokenDto responseParse = gson.fromJson(new String(response.body().bytes()), TokenDto.class);
       handleFailure(response, responseParse);
     }

@@ -16,6 +16,7 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -48,9 +49,7 @@ import com.blackbeard.sensors.utils.Constants;
 import com.blackbeard.sensors.utils.PreferencesUtil;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.internal.LinkedTreeMap;
-import com.google.gson.reflect.TypeToken;
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -142,8 +141,13 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
           String responseBody = null;
           Response response = null;
           try {
+            String searchParam;
+            if(Patterns.PHONE.matcher(params[0]).matches())
+              searchParam = Constants.SEARCH_PARAMS.PHONE;
+            else searchParam = Constants.SEARCH_PARAMS.NAME;
+
             HashMap<String, String[]> searchParams = new HashMap<>(2);
-            searchParams.put("search_params", new String[] { "user_name" });//TODO: change this to simple 1 query thing
+            searchParams.put("search_params", new String[] { searchParam });//TODO: change this to simple 1 query thing
             searchParams.put("search_values", new String[] { params[0] });
             response = sendRequest(Constants.URLS.SEARCH, Constants.GSON.toJson(searchParams));
 

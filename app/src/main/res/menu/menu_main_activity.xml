@@ -8,4 +8,11 @@
       android:orderInCategory="1"
       android:title="@string/hint_search"
       app:showAsAction="always"/>
+  <item
+      android:id="@+id/action_logout"
+      android:icon="@mipmap/ic_exit_to_app_black"
+      android:orderInCategory="2"
+      android:title="@string/hint_logout"
+      app:showAsAction="never"/>
+
 </menu>
