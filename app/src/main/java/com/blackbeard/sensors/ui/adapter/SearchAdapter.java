@@ -25,6 +25,7 @@ import com.blackbeard.sensors.api.dto.ThermometerDto;
 import com.blackbeard.sensors.utils.LocationUtils;
 import com.ms.square.android.expandabletextview.ExpandableTextView;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * Created by sudendra.kamble on 12/10/16.
@@ -51,7 +52,13 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH
       //    .getString(R.string.device_info, deviceInfoDto.getDevice(), deviceInfoDto.getManufacturer(),
       //        deviceInfoDto.getModel(), deviceInfoDto.getSystemVersion(), deviceInfoDto.getSystemVersionName(),
       //        deviceInfoDto.getUserName(), deviceInfoDto.getPhone()));
+
       holder.userInfo.setText(context.getString(R.string.device_info_minimal, deviceDto.getUserName(), deviceDto.getPhone()));
+      if (deviceDto.getTimestampMillis() != 0) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(deviceDto.getTimestampMillis());
+        holder.userInfo.append("\n" + calendar.getTime());
+      }
       ExpandableTextView sensorInfo = holder.sensorInfo;
       SpannableStringBuilder builder=new SpannableStringBuilder();
 

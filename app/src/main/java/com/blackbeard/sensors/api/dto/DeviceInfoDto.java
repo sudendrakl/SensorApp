@@ -23,6 +23,7 @@ public class DeviceInfoDto {
   String userName;
   String phone;
   String uid;
+  long timestampMillis;
 
   public DeviceInfoDto(List hardwareDetail) {
     try {

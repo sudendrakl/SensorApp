@@ -151,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
 
       final DeviceInfoDto deviceInfoDto = new DeviceInfoDto(jsonArray);
       deviceInfoDto.setUid(AppUtil.getImeiOrUniqueID(getApplicationContext()));
+      deviceInfoDto.setTimestampMillis(System.currentTimeMillis());
       sendRequest(Constants.URLS.ADD_ENTRY, Constants.GSON.toJson(deviceInfoDto));
 
     } catch (IOException | JSONException e) {
