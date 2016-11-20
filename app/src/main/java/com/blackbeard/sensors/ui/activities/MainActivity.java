@@ -169,15 +169,22 @@ public class MainActivity extends AppCompatActivity {
         .build();
 
     Response response = client.newCall(request).execute();
-    try {
-      String responseString = new String(response.body().bytes());
-      if (!response.isSuccessful()) {
-        handleFailure(response, responseString);
-      } else {
-        handleSuccess(response, responseString);
+    if (response != null) {
+
+      try {
+        String responseString = new String(response.body().bytes());
+        if (!response.isSuccessful()) {
+          handleFailure(response, responseString);
+        } else {
+          handleSuccess(response, responseString);
+        }
+      } catch (IOException ex) {
+        Log.e(TAG, "Some shit happened", ex);
       }
-    } catch (IOException ex) {
-      Log.e(TAG, "Some shit happened", ex);
+    } else {
+      Snackbar.make(toolbar, "Please check n/w settings", Snackbar.LENGTH_SHORT)
+          .setAction("OK", new View.OnClickListener() {@Override public void onClick(View v) {}})
+          .show();
     }
   }
 
@@ -286,7 +293,9 @@ public class MainActivity extends AppCompatActivity {
       @Override public void onFailure(Call call, IOException e) {
         Log.d(TAG, "failed to log off....");
         e.printStackTrace();
-        Snackbar.make(toolbar, "Failed to logout, please try again", Snackbar.LENGTH_INDEFINITE).show();
+        Snackbar.make(toolbar, "Failed to logout, please try again", Snackbar.LENGTH_INDEFINITE)
+            .setAction("OK", new View.OnClickListener() {@Override public void onClick(View v) {}})
+            .show();
       }
 
       @Override public void onResponse(Call call, Response response) throws IOException {

@@ -446,10 +446,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
       mAuthTask = null;
       showProgress(false);
       try {
-        if (!response.isSuccessful()) {
-          handleFailure(response);
+        if (response != null) {
+          if (!response.isSuccessful()) {
+            handleFailure(response);
+          } else {
+            handleSuccess(response);
+          }
         } else {
-          handleSuccess(response);
+          Snackbar.make(mLoginFormView, "Please check n/w settings", Snackbar.LENGTH_SHORT)
+              .setAction("OK", new View.OnClickListener() {@Override public void onClick(View v) {}})
+              .show();
         }
       } catch (IOException ex) {
         Log.e(TAG, "Some shit happened", ex);
@@ -473,10 +479,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
           if (!isLogin) { //registration
             if (tokenDto.getCode() == 1) {
               Snackbar.make(mLoginFormView, tokenDto.getMessage(), Snackbar.LENGTH_SHORT)
-                  .setAction("OK", null)
+                  .setAction("OK", new View.OnClickListener() {@Override public void onClick(View v) {}})
                   .show();
             } else {
-              Snackbar.make(mLoginFormView, tokenDto.getMessage() + ". Retry again", Snackbar.LENGTH_LONG).setAction("OK", null).show();
+              Snackbar.make(mLoginFormView, tokenDto.getMessage() + ". Retry again", Snackbar.LENGTH_LONG)
+                  .setAction("OK", new View.OnClickListener() {@Override public void onClick(View v) {}})
+                  .show();
             }
           } else { //login
             switch (response.code()) {

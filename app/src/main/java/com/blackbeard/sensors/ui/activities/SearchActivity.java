@@ -211,7 +211,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
   void handleFailure(final Response response, final String responseBody) throws IOException, JsonSyntaxException {
     if(response==null || responseBody == null) {
       Snackbar.make(searchView, "Failed to search, please check n/w", Snackbar.LENGTH_INDEFINITE)
-          .setAction("OK", null)
+          .setAction("OK", new View.OnClickListener() {@Override public void onClick(View v) {}})
           .show();
       searchAdapter.refresh(null);
       return;
@@ -223,7 +223,7 @@ public class SearchActivity extends AppCompatActivity implements SearchView.OnQu
         APIResponseDto responseParse = Constants.GSON.fromJson(responseBody, APIResponseDto.class);
         if (responseCode == 400 || responseCode == 500) {
           Snackbar.make(toolbar, responseParse.getMessage(), Snackbar.LENGTH_SHORT)
-              .setAction("OK", null)
+              .setAction("OK", new View.OnClickListener() {@Override public void onClick(View v) {}})
               .show();
         } else if (responseCode == 401 || responseCode == 403) { //unauthorised //clear token, redirect to login from here
           Snackbar.make(toolbar, "Unauthorised access", Snackbar.LENGTH_SHORT)

@@ -100,7 +100,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH
           sensorTextBuilder.append(txt!=null? txt:"");
         } else if(object instanceof ProximityDto) {
           sensorTextBuilder.append(getTitleBuilder(builder,"Proximity"));
-          sensorTextBuilder.append(String.format("Distance:%scm", ((ProximityDto) object).getValue()));
+          sensorTextBuilder.append(String.format("Distance:%.1fcm", ((ProximityDto) object).getValue()));
         } else if(object instanceof StepsDto) {
           sensorTextBuilder.append(getTitleBuilder(builder,"StepCounter"));
           sensorTextBuilder.append(String.format("Available:%s\n", ((StepsDto) object).isAvailableStepCounter() || ((StepsDto) object).isAvailableStepDetector() ? "yes" : "no"));

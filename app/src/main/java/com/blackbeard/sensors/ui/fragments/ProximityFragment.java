@@ -41,7 +41,7 @@ import org.json.JSONException;
   }
 
   @UiThread(propagation = UiThread.Propagation.REUSE)  void updateText(float v1) {
-    content.setText(String.format("Distance:%scm", v1));
+    content.setText(String.format("Distance:%.1fcm", v1));
   }
 
   @Override public void onDetach() {
