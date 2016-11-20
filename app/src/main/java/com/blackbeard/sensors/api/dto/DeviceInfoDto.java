@@ -26,20 +26,20 @@ public class DeviceInfoDto {
   long timestampMillis;
 
   public DeviceInfoDto(List hardwareDetail) {
-    try {
-      device = android.os.Build.BOARD;
-      model = android.os.Build.BRAND;
-      manufacturer = android.os.Build.DEVICE;
-      device = android.os.Build.MODEL;
-      model = android.os.Build.PRODUCT;
+    device = android.os.Build.BOARD;
+    model = android.os.Build.BRAND;
+    manufacturer = android.os.Build.DEVICE;
+    device = android.os.Build.MODEL;
+    model = android.os.Build.PRODUCT;
 
-      systemVersion = android.os.Build.VERSION.RELEASE;
+    systemVersion = android.os.Build.VERSION.RELEASE;
+    try {
       Field[] fields = Build.VERSION_CODES.class.getFields();
-      systemVersionName = "Android "+fields[Build.VERSION.SDK_INT + 1].getName();
-      appVersion = BuildConfig.VERSION_NAME;
-      hardwareDetails = hardwareDetail;
+      systemVersionName = "Android " + fields[Build.VERSION.SDK_INT + 1].getName();
     } catch (Exception e) {
       e.printStackTrace();
     }
+    appVersion = BuildConfig.VERSION_NAME;
+    hardwareDetails = hardwareDetail;
   }
 }

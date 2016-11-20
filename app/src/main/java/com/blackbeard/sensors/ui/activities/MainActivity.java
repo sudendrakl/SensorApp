@@ -24,26 +24,26 @@ import android.view.View;
 import com.bizapps.sensors.R;
 import com.blackbeard.sensors.api.dto.APIResponseDto;
 import com.blackbeard.sensors.api.dto.DeviceInfoDto;
-import com.blackbeard.sensors.fragments.AccelerometerFragment;
-import com.blackbeard.sensors.fragments.AccelerometerFragment_;
-import com.blackbeard.sensors.fragments.BarometerFragment;
-import com.blackbeard.sensors.fragments.BarometerFragment_;
-import com.blackbeard.sensors.fragments.BatteryFragment;
-import com.blackbeard.sensors.fragments.BatteryFragment_;
-import com.blackbeard.sensors.fragments.BluetoothFragment;
-import com.blackbeard.sensors.fragments.BluetoothFragment_;
-import com.blackbeard.sensors.fragments.GPSFragment;
-import com.blackbeard.sensors.fragments.GPSFragment_;
-import com.blackbeard.sensors.fragments.GyroscopeFragment;
-import com.blackbeard.sensors.fragments.GyroscopeFragment_;
-import com.blackbeard.sensors.fragments.NFCFragment;
-import com.blackbeard.sensors.fragments.NFCFragment_;
-import com.blackbeard.sensors.fragments.ProximityFragment;
-import com.blackbeard.sensors.fragments.ProximityFragment_;
-import com.blackbeard.sensors.fragments.StepCounterFragment;
-import com.blackbeard.sensors.fragments.StepCounterFragment_;
-import com.blackbeard.sensors.fragments.ThermometerFragment;
-import com.blackbeard.sensors.fragments.ThermometerFragment_;
+import com.blackbeard.sensors.ui.fragments.AccelerometerFragment_;
+import com.blackbeard.sensors.ui.fragments.BarometerFragment_;
+import com.blackbeard.sensors.ui.fragments.BatteryFragment_;
+import com.blackbeard.sensors.ui.fragments.BluetoothFragment_;
+import com.blackbeard.sensors.ui.fragments.GPSFragment_;
+import com.blackbeard.sensors.ui.fragments.GyroscopeFragment_;
+import com.blackbeard.sensors.ui.fragments.NFCFragment_;
+import com.blackbeard.sensors.ui.fragments.ProximityFragment_;
+import com.blackbeard.sensors.ui.fragments.StepCounterFragment_;
+import com.blackbeard.sensors.ui.fragments.ThermometerFragment_;
+import com.blackbeard.sensors.ui.fragments.AccelerometerFragment;
+import com.blackbeard.sensors.ui.fragments.BarometerFragment;
+import com.blackbeard.sensors.ui.fragments.BatteryFragment;
+import com.blackbeard.sensors.ui.fragments.BluetoothFragment;
+import com.blackbeard.sensors.ui.fragments.GPSFragment;
+import com.blackbeard.sensors.ui.fragments.GyroscopeFragment;
+import com.blackbeard.sensors.ui.fragments.NFCFragment;
+import com.blackbeard.sensors.ui.fragments.ProximityFragment;
+import com.blackbeard.sensors.ui.fragments.StepCounterFragment;
+import com.blackbeard.sensors.ui.fragments.ThermometerFragment;
 import com.blackbeard.sensors.utils.AppUtil;
 import com.blackbeard.sensors.utils.Constants;
 import com.blackbeard.sensors.utils.PreferencesUtil;
@@ -69,6 +69,7 @@ public class MainActivity extends AppCompatActivity {
   private Timer autoSyncTimer;
   private TimerTask autoSyncTimerTask;
   private final OkHttpClient client = new OkHttpClient();
+  private boolean firstSync;
 
   @Override protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
@@ -200,18 +201,26 @@ public class MainActivity extends AppCompatActivity {
       //    .setAction("OK", null)
       //    .show();
     }
+    if(!firstSync) {
+      Snackbar.make(toolbar, "Failed to sync", Snackbar.LENGTH_SHORT)
+          //.setAction("OK", null)
+          .show();
+    }
   }
 
   void handleSuccess(Response response, String responseString) throws IOException {
     Log.d(TAG, String.format("handleSuccess(%d): %s", response.code(), responseString));
     APIResponseDto responseParse = Constants.GSON.fromJson(responseString, APIResponseDto.class);
     if (responseParse.isStatus()) {
-      //Snackbar.make(toolbar, responseParse.getMessage(), Snackbar.LENGTH_LONG)
-      //    .setAction("OK", null)
-      //    .show();
+      if(!firstSync) {
+        Snackbar.make(toolbar, "Sensor data synced", Snackbar.LENGTH_SHORT)
+            //.setAction("OK", null)
+            .show();
+      }
     } else {
       handleFailure(response, responseString);
     }
+    firstSync = true;
   }
 
   BroadcastReceiver receiver = new BroadcastReceiver() {
@@ -232,6 +241,8 @@ public class MainActivity extends AppCompatActivity {
       startActivity(new Intent(this, SearchActivity.class));
     } else if (item.getItemId() == R.id.action_logout) {
       logout();
+    } else if (item.getItemId() == R.id.action_sync) {
+      firstSync = false;
     }
     return super.onOptionsItemSelected(item);
   }

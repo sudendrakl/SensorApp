@@ -1,4 +1,4 @@
-package com.blackbeard.sensors.fragments;
+package com.blackbeard.sensors.ui.fragments;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
@@ -38,8 +38,12 @@ import org.json.JSONException;
 
   @AfterViews  void initViews() {
     title.setText("Bluetooth");
-    adapter.startDiscovery();
-    updateText("Status:" + (adapter.isEnabled()?"on":"off"));
+    if(adapter != null) {
+      adapter.startDiscovery();
+      updateText("Status:" + (adapter.isEnabled() ? "on" : "off"));
+    } else {
+      updateText("Unable to find bluetooth");
+    }
   }
 
   private void extractAndUpdate(Intent intent) {
@@ -132,17 +136,24 @@ import org.json.JSONException;
   }
 
   @UiThread  void handlePostDetach() {
-    adapter.cancelDiscovery();
+    if (adapter != null) {
+      adapter.cancelDiscovery();
+    }
   }
 
 
   public HashMap<String, BluetoothDto> getData() throws JSONException {
     BluetoothDto bDto = new BluetoothDto();
-    bDto.setBluetoothOnStatus(bluetoothOnStatus);
-    bDto.setStatus(status);
-    bDto.setDevicesList(devicesList);
+    if (adapter != null) {
+      bDto.setBluetoothOnStatus(bluetoothOnStatus);
+      bDto.setStatus(status);
+      bDto.setDevicesList(devicesList);
+    } else {
+      bDto.setBluetoothOnStatus("No bluetooth device found");
+    }
+
     HashMap<String, BluetoothDto> hashMap = new HashMap<>(1);
     hashMap.put(TAG, bDto);
-    return  hashMap;//Constants.GSON.toJson(hashMap);
+    return hashMap;//Constants.GSON.toJson(hashMap);
   }
 }

@@ -11,8 +11,8 @@ android {
     applicationId "com.bizapps.sensors"
     minSdkVersion 15
     targetSdkVersion 24
-    versionCode 8
-    versionName "1.4"
+    versionCode 10
+    versionName "1.6"
    //testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     archivesBaseName = "$name-v$versionName-c$versionCode"
   }

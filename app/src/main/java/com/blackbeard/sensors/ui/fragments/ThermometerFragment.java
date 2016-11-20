@@ -1,4 +1,4 @@
-package com.blackbeard.sensors.fragments;
+package com.blackbeard.sensors.ui.fragments;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;

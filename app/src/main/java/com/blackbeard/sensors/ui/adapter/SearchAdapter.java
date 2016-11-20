@@ -24,6 +24,7 @@ import com.blackbeard.sensors.api.dto.StepsDto;
 import com.blackbeard.sensors.api.dto.ThermometerDto;
 import com.blackbeard.sensors.utils.LocationUtils;
 import com.ms.square.android.expandabletextview.ExpandableTextView;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -32,6 +33,7 @@ import java.util.Calendar;
  */
 public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH> {
   ArrayList<DeviceInfoDto> list;
+  private SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm a");
 
   public SearchAdapter(ArrayList<DeviceInfoDto> list) {
     super();
@@ -54,10 +56,15 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH
       //        deviceInfoDto.getUserName(), deviceInfoDto.getPhone()));
 
       holder.userInfo.setText(context.getString(R.string.device_info_minimal, deviceDto.getUserName(), deviceDto.getPhone()));
-      if (deviceDto.getTimestampMillis() != 0) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTimeInMillis(deviceDto.getTimestampMillis());
-        holder.userInfo.append("\n" + calendar.getTime());
+      try {
+        if (deviceDto.getTimestampMillis() != 0) {
+          Calendar calendar = Calendar.getInstance();
+          calendar.setTimeInMillis(deviceDto.getTimestampMillis());
+          simpleDateFormat.setCalendar(calendar);
+          holder.userInfo.append("\n" + simpleDateFormat.format(Calendar.getInstance().getTime()));
+        }
+      } catch (Exception e) {
+        e.printStackTrace();
       }
       ExpandableTextView sensorInfo = holder.sensorInfo;
       SpannableStringBuilder builder=new SpannableStringBuilder();
@@ -81,8 +88,7 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.RecyclerVH
         } else if(object instanceof GPSDto) {
           sensorTextBuilder.append(getTitleBuilder(builder,"GPS"));
           sensorTextBuilder.append(String.format("Available:%s Provider:%s Enabled:%s Accuracy:%s\n", ((GPSDto) object).isAvailable(), ((GPSDto) object).getProvider(), ((GPSDto) object).isEnabled(), LocationUtils.getLocationMode(((GPSDto) object).getAccuracyMode())));
-          sensorTextBuilder.append(String.format( "Latitude:%.3f  Longitude:%.3f Accuracy:%.3s", ((GPSDto) object).getLatitude(),
-              ((GPSDto) object).getLongitude(), ((GPSDto) object).getAccuracy()));
+          sensorTextBuilder.append(String.format( "Latitude:%.3f  Longitude:%.3f Accuracy:%.3s", ((GPSDto) object).getLatitude(), ((GPSDto) object).getLongitude(), ((GPSDto) object).getAccuracy()));
         } else if(object instanceof GyroDto) {
           sensorTextBuilder.append(getTitleBuilder(builder,"Gyroscope"));
           sensorTextBuilder.append(String.format("Available:%s\n", ((GyroDto) object).isAvailable() ? "yes" : "no"));
