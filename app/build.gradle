@@ -11,8 +11,8 @@ android {
     applicationId "com.bizapps.sensors"
     minSdkVersion 15
     targetSdkVersion 24
-    versionCode 10
-    versionName "1.6"
+    versionCode 11
+    versionName "1.7"
    //testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     archivesBaseName = "$name-v$versionName-c$versionCode"
   }
@@ -38,7 +38,7 @@ android {
       proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
       signingConfig signingConfigs.release
       versionNameSuffix "-release"
-      buildConfigField "String", "BASE_URL", '"http://139.59.5.88:3500/"' //TODO for release
+      buildConfigField "String", "BASE_URL", '"http://35.154.32.158:3500/"' //TODO for release
 
     }
     debug {
@@ -46,7 +46,7 @@ android {
       minifyEnabled false
       signingConfig signingConfigs.debug
       versionNameSuffix "-debug"
-      buildConfigField "String", "BASE_URL", '"http://139.59.5.88:3500/"' //TODO for debug
+      buildConfigField "String", "BASE_URL", '"http://35.154.32.158:3500/"' //TODO for debug
     }
   }
 }
